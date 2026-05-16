@@ -16,22 +16,26 @@ from pathlib import Path
 import click
 
 
-DEFAULT_MOCK_OUTPUTS = {
-    "你食飽未?": "你吃饱了吗?",
-    "今仔日真好天。": "今天天气真好。",
-    "我欲轉去厝。": "我要回家。",
-    "阿母叫我食藥仔。": "妈妈叫我吃药。",
-    "囡仔人愛讀冊。": "小孩子要读书。",
-}
+from .eval_samples import ALL_MINERS
 
 
 def run_mock(uid: int, out_path: Path) -> None:
-    """Write a JSON of {uid: {hokkien: mandarin}} that validator.py can consume."""
+    """Write {uid: {hokkien: mandarin}} that validator.py picks up.
+
+    Different uids deliberately produce different quality outputs so the
+    composite score actually differentiates miners on all 3 signals:
+      uid=0 professional, uid=1 competent, uid=2 poor.
+    """
+    outputs = ALL_MINERS.get(uid)
+    if outputs is None:
+        # For uids beyond our preset, fall back to professional outputs
+        outputs = ALL_MINERS[0]
     out_path.parent.mkdir(parents=True, exist_ok=True)
     existing = json.loads(out_path.read_text()) if out_path.exists() else {}
-    existing[str(uid)] = DEFAULT_MOCK_OUTPUTS
+    existing[str(uid)] = outputs
     out_path.write_text(json.dumps(existing, ensure_ascii=False, indent=2))
-    click.echo(f"✓ miner uid={uid} wrote {len(DEFAULT_MOCK_OUTPUTS)} translations to {out_path}")
+    quality = {0: "professional", 1: "competent", 2: "poor"}.get(uid, "professional")
+    click.echo(f"✓ miner uid={uid} ({quality}) wrote {len(outputs)} translations to {out_path}")
 
 
 def run_whisper(uid: int, out_path: Path) -> None:

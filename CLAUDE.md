@@ -188,36 +188,39 @@ Use `glm-4.6` model via `https://open.bigmodel.cn/api/paas/v4/chat/completions`.
 - Meta `hokkien_translation` repo: https://github.com/facebookresearch/fairseq/tree/ust/examples/hokkien
 - The intel report this came from: `/home/edwardtay/2-projects/bittensor/README.md` (sections: Ideathon, Builder Advanced)
 
-## Current status (updated 2026-05-16)
+## Current status (updated 2026-05-16, v2)
 
 | Deliverable | Status |
 |---|---|
-| CLAUDE.md (this file) | ✅ |
-| README.md (one-page pitch) | ✅ |
-| whitepaper.md (full mechanism, 9 sections) | ✅ |
+| CLAUDE.md (steering doc) | ✅ |
+| README.md (lead with win story) | ✅ |
+| whitepaper.md (9-section mechanism design) | ✅ |
+| partners.md (Hokkien diaspora orgs) | ✅ |
 | pyproject.toml + venv installable | ✅ |
-| `languageark/protocol.py` (Synapse types) | ✅ |
-| `languageark/scoring.py` (composite score) | ✅ |
-| `languageark/glm_client.py` (Zhipu GLM-4.6) | ✅ |
-| `languageark/elo.py` (Glicko-2) | ✅ |
-| `languageark/speaker_dao.py` (2-of-3 attestation registry) | ✅ |
-| `languageark/miner.py` (mock + Whisper stub) | ✅ |
-| `languageark/validator.py` (end-to-end scoring pipeline) | ✅ |
-| `languageark/cli_bootstrap.py` (seed demo DAO) | ✅ |
-| `demo.sh` (90s scripted demo, runs in 5s) | ✅ |
-| `slides/pitch.md` (10-slide marp deck) | ✅ |
-| `tests/` (27/27 passing) | ✅ |
+| `languageark/protocol.py` Synapse types | ✅ |
+| `languageark/scoring.py` composite score | ✅ |
+| `languageark/glm_client.py` Zhipu GLM-4.6 + MockGLM heuristic fallback | ✅ |
+| `languageark/elo.py` Glicko-2 | ✅ |
+| `languageark/speaker_dao.py` 2-of-3 attestation registry | ✅ |
+| `languageark/eval_samples.py` 8 Hokkien sentences + 3 quality tiers | ✅ |
+| `languageark/miner.py` differentiated mock outputs | ✅ |
+| `languageark/validator.py` end-to-end pipeline w/ commit-reveal hash | ✅ |
+| **`languageark/attack.py` weight-copy simulator (100% vs 42% knockout)** | ✅ |
+| **`languageark/subnet_register.py` btcli command sheet** | ✅ |
+| `languageark/cli_bootstrap.py` seed DAO | ✅ |
+| `demo.sh` 7-step demo (runs in 5s, no API key) | ✅ |
+| `slides/pitch.md` 13-slide marp deck | ✅ |
+| `tests/` **38/38 passing** | ✅ |
 | Whisper-small Hokkien real wiring | ⏳ stretch |
-| docker-compose | ⏳ stretch |
-| Real Hokkien Common Voice audio samples in repo | ⏳ stretch |
-| Live GLM-4.6 demo with real ZHIPU_API_KEY | ⏳ — needs sponsor key |
+| Live GLM-4.6 demo with real ZHIPU_API_KEY | ⏳ — get key from sponsor at event |
+| Recorded asciicast fallback video | ⏳ optional |
 
-The prototype is **demoable as-is**. To continue:
+The pitch is **submission-ready**. Remaining stretch items for the actual judging:
 
-1. **Highest value next step:** acquire `ZHIPU_API_KEY` (free from sponsor at event) and re-run `bash demo.sh` to show the BLEU column produce non-zero numbers.
-2. **Second:** wire `miner.py --mode=whisper` to a real Hokkien Whisper fine-tune from HF. Try `formospeech/whisper-large-v2-cantonese-hk` (Hokkien variant) or fork `facebook/seamless-m4t-v2-large`.
-3. **Third:** add a `subnet_register.py` script that prints the literal `btcli subnet create` command with our chosen hyperparams baked in (showing judges we know the chain interface).
-4. Render `slides/pitch.md` to PDF with `marp slides/pitch.md --pdf`.
+1. **At the event:** get `ZHIPU_API_KEY` from Zhipu sponsor booth. `export ZHIPU_API_KEY=...` then re-run `bash demo.sh` to show real GLM-4.6 lighting up the BLEU column. (Mock fallback already covers this if key is unavailable.)
+2. **Optional polish:** wire `miner.py --mode=whisper` to `facebook/seamless-m4t-v2-large` (which has Hokkien support out of the box) — adds visual flair of seeing a real model produce real translations.
+3. **Render slides:** `npx @marp-team/marp-cli slides/pitch.md --pdf` for the projector.
+4. **Record fallback:** `asciinema rec` the demo and host on asciinema.org so a network outage at the venue can't kill the live demo.
 
 ## Decisions log
 

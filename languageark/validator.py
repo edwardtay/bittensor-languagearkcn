@@ -21,35 +21,17 @@ from pathlib import Path
 import click
 import sacrebleu
 
-from .glm_client import GLMClient, long_name
+from .eval_samples import EVAL_SAMPLES_NAN, EvalSample
+from .glm_client import GLMClient, MockGLMClient, long_name, make_glm
 from .scoring import composite_score, normalize_weight_vector
 from .speaker_dao import SpeakerDAO
-
-
-@dataclass
-class EvalSample:
-    """One eval sample: a Hokkien sentence in characters/POJ and its Mandarin gloss."""
-
-    hokkien: str       # source text (Han or POJ)
-    mandarin_gold: str # gold Mandarin translation (for FLORES-style direct check)
-    script: str        # "han" | "poj"
-
-
-# ─── Hard-coded mini eval set (replace with FLORES-200 nan-tw rotation) ────
-EVAL_SAMPLES_NAN: list[EvalSample] = [
-    EvalSample(hokkien="你食飽未?", mandarin_gold="你吃饱了吗?", script="han"),
-    EvalSample(hokkien="今仔日真好天。", mandarin_gold="今天天气真好。", script="han"),
-    EvalSample(hokkien="我欲轉去厝。", mandarin_gold="我要回家。", script="han"),
-    EvalSample(hokkien="阿母叫我食藥仔。", mandarin_gold="妈妈叫我吃药。", script="han"),
-    EvalSample(hokkien="囡仔人愛讀冊。", mandarin_gold="小孩子要读书。", script="han"),
-]
 
 
 async def score_one_miner(
     miner_uid: int,
     miner_translations: dict[str, str],  # hokkien -> miner's mandarin
     samples: list[EvalSample],
-    glm: GLMClient,
+    glm: GLMClient | MockGLMClient,
     dao: SpeakerDAO,
     lang: str = "nan",
 ) -> dict[str, float]:
@@ -120,14 +102,12 @@ async def main_async(
     # miners.json shape:
     # { "0": {"你食飽未?": "你吃饱了吗?", ...}, "1": {...} }
 
-    api_key = os.environ.get("ZHIPU_API_KEY")
-    if not api_key:
-        click.echo("⚠️  ZHIPU_API_KEY not set — back-translation BLEU will be zero.", err=True)
-    glm = GLMClient(api_key=api_key) if api_key else _MockGLM()
+    glm = make_glm()
+    glm_kind = "GLM-4.6 (live)" if isinstance(glm, GLMClient) else "mock-heuristic (offline)"
 
     dao = SpeakerDAO(dao_path)
 
-    click.echo(f"\n🎯 LanguageArk-CN validator | netuid={netuid} | lang={lang} | tempo demo\n")
+    click.echo(f"\n🎯 LanguageArk-CN validator | netuid={netuid} | lang={lang} | back-translator={glm_kind}\n")
 
     results = []
     for uid_str, translations in miners.items():
@@ -158,14 +138,6 @@ async def main_async(
     click.echo(f"\n🔐 commit_reveal: would submit hash now, reveal in 5 tempos")
     click.echo(f"   commit_hash = 0x{commit_hash[:32]}…")
     click.echo(f"   (anti-weight-copy: copying miners cannot see real weights for 5 tempos)\n")
-
-
-class _MockGLM:
-    """Stub for offline demo. Returns the input unchanged → BLEU will be low but >0."""
-
-    async def translate(self, text, src_lang, tgt_lang):
-        from types import SimpleNamespace
-        return SimpleNamespace(translation=text)
 
 
 @click.command()
