@@ -1,46 +1,59 @@
 from languageark.eval_samples import (
-    ALL_MINERS,
-    EVAL_SAMPLES_NAN,
-    MINER_0_OUTPUTS,
-    MINER_1_OUTPUTS,
-    MINER_2_OUTPUTS,
+    flores_chinese_family_eval_set,
+    generate_miner_outputs,
+    hokkien_eval_set,
 )
 
 
-def test_eval_samples_have_required_fields():
-    assert len(EVAL_SAMPLES_NAN) >= 5
-    for s in EVAL_SAMPLES_NAN:
-        assert s.hokkien
-        assert s.poj
-        assert s.mandarin_gold
+def test_hokkien_set_has_required_fields():
+    samples = hokkien_eval_set()
+    assert len(samples) >= 5
+    for s in samples:
+        assert s.source_text
+        assert s.gold_target
+        assert s.source_lang == "nan"
+        assert s.target_lang == "zh-Hans"
 
 
-def test_miner_0_is_perfect_match():
-    """The 'professional' miner should match gold exactly."""
-    for s in EVAL_SAMPLES_NAN:
-        assert MINER_0_OUTPUTS[s.hokkien] == s.mandarin_gold
+def test_flores_yue_real_data_loaded():
+    """REAL FLORES-200 Cantonese-Mandarin pairs must load."""
+    samples = flores_chinese_family_eval_set(n=10)
+    assert len(samples) == 10
+    for s in samples:
+        assert s.source_lang == "yue_Hant"
+        assert s.target_lang == "zho_Hans"
+        # These are real translated sentences, should be substantive
+        assert len(s.source_text) > 10
+        assert len(s.gold_target) > 10
 
 
-def test_miner_1_is_competent_but_different():
-    """The 'competent' miner outputs differ from gold but cover all samples."""
-    diffs = 0
-    for s in EVAL_SAMPLES_NAN:
-        if MINER_1_OUTPUTS[s.hokkien] != s.mandarin_gold:
-            diffs += 1
-    assert diffs >= 1, "competent miner should differ on at least one sample"
+def test_miner_0_returns_gold_exactly():
+    samples = hokkien_eval_set()
+    outputs = generate_miner_outputs(samples)
+    for s in samples:
+        assert outputs[0][s.source_text] == s.gold_target
 
 
-def test_miner_2_is_clearly_worse():
-    """The 'poor' miner should differ from gold on all samples."""
-    diffs = sum(1 for s in EVAL_SAMPLES_NAN if MINER_2_OUTPUTS[s.hokkien] != s.mandarin_gold)
-    assert diffs >= 5, "poor miner should differ on most samples"
+def test_miner_2_degrades_significantly():
+    samples = hokkien_eval_set()
+    outputs = generate_miner_outputs(samples)
+    diffs = sum(1 for s in samples if outputs[2][s.source_text] != s.gold_target)
+    assert diffs >= len(samples) - 1, "poor miner should differ from gold on nearly all samples"
 
 
-def test_all_miners_keyed_by_uid():
-    assert set(ALL_MINERS.keys()) == {0, 1, 2}
+def test_miner_outputs_deterministic():
+    """Same input → same outputs, even after re-call. Important for replay."""
+    samples = hokkien_eval_set()
+    o1 = generate_miner_outputs(samples)
+    o2 = generate_miner_outputs(samples)
+    assert o1[1] == o2[1]
+    assert o1[2] == o2[2]
 
 
-def test_all_miners_cover_all_samples():
-    for uid, outputs in ALL_MINERS.items():
-        for s in EVAL_SAMPLES_NAN:
-            assert s.hokkien in outputs, f"uid={uid} missing {s.hokkien}"
+def test_miner_outputs_cover_all_uids():
+    samples = hokkien_eval_set()
+    outputs = generate_miner_outputs(samples)
+    assert set(outputs.keys()) == {0, 1, 2}
+    for uid, out in outputs.items():
+        for s in samples:
+            assert s.source_text in out, f"uid={uid} missing source"

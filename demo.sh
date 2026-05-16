@@ -6,7 +6,6 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
-# Use venv if present
 if [[ -d .venv ]]; then
     export PATH="$ROOT/.venv/bin:$PATH"
 fi
@@ -19,42 +18,46 @@ echo "════════════════════════�
 echo
 
 # ── ❶ Problem framing
-echo "❶  问题: 中国 130+ 种濒危方言, 零条 Bittensor 子网解决"
-echo "    Problem: 130+ endangered Chinese languages. No Bittensor subnet addresses them."
-echo "    v1 demo: Hokkien (Min Nan, ISO nan) — Meta's canonical low-resource case."
+echo "❶  问题: 中国 130+ 种濒危方言, 零条 Bittensor 子网"
+echo "    Even FLORES-200 (Meta's 200-language benchmark) has NO Hokkien."
+echo "    That gap is exactly the market this subnet fills."
 echo
 
-# ── ❷ Bootstrap speaker DAO
-rm -f data/speaker_dao.json data/mock_miners.json 2>/dev/null || true
-echo "❷  Bootstrap native-speaker DAO (2-of-3 attestation, 100 TAO stake)"
+# ── ❷ Real bittensor SDK + Synapse types
+echo "❷  REAL bittensor SDK integration (not pydantic stubs)"
+python -m languageark.chain synapse-demo 2>&1 | head -12
+echo
+
+# ── ❸ Speaker DAO bootstrap
+echo "❸  Bootstrap native-speaker DAO (2-of-3 attestation, 100 TAO stake)"
+rm -f data/speaker_dao.json
 python -m languageark.cli_bootstrap
 echo
 
-# ── ❸ Three miners of varying quality
-echo "❸  Run 3 miners (uid 0=professional, 1=competent, 2=poor)"
-python -m languageark.miner --uid=0 --lang=nan --mode=mock
-python -m languageark.miner --uid=1 --lang=nan --mode=mock
-python -m languageark.miner --uid=2 --lang=nan --mode=mock
+# ── ❹ Score on curated Hokkien set
+echo "❹  Score 3 miners on curated Hokkien eval set (10 pairs)"
+python -m languageark.validator --eval-set hokkien
 echo
 
-# ── ❹ Validator scoring with 3-signal composite
-echo "❹  Validator: 3-signal composite = 0.4·Elo + 0.3·BLEU_bt + 0.3·FLORES"
-python -m languageark.validator --netuid=999 --lang=nan
+# ── ❺ Score on REAL FLORES-200 yue↔zho (997 pro-translated sentences)
+echo "❺  Score on REAL FLORES-200 yue_Hant↔zho_Hans (Cantonese family proxy)"
+python -m languageark.validator --eval-set flores-yue
 echo
 
-# ── ❺ Attack demo — the 博弈力 moment
-echo "❺  博弈力 demo: weight-copy attack vs commit-reveal defense"
-python -m languageark.attack
+# ── ❻ Attack simulator
+echo "❻  博弈力: weight-copy attack vs commit-reveal defense"
+python -m languageark.attack 2>&1 | tail -20
 echo
 
-# ── ❻ Mainnet registration command sheet
-echo "❻  Mainnet registration (we know the chain interface)"
-python -m languageark.subnet_register --wallet=languageark --hotkey=owner --network=finney
+# ── ❼ Mainnet registration command sheet
+echo "❼  Mainnet registration command sheet (we know the chain interface)"
+python -m languageark.subnet_register --wallet=languageark --hotkey=owner --network=finney 2>&1 | head -25
+echo "   [... full sheet via: python -m languageark.subnet_register ...]"
 echo
 
-# ── ❼ Buyer slide (verbal)
+# ── ❽ Buyer slide
 cat <<'EOF'
-❼  Buyers (产品力):
+❽  Buyers (产品力):
       • Mozilla Common Voice           — pays for validated dataset contributions
       • 国家语言文字工作委员会          — 数字化方言 budget line
       • UNESCO                         — endangered-language preservation grants

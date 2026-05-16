@@ -1,0 +1,55 @@
+# What's real and what's still a toy
+
+A submission like this is easy to oversell. This page is the unvarnished status.
+
+## What's REAL ✅
+
+- **bittensor SDK is genuinely installed and used.** `import bittensor as bt` works (v10.3.2). `HokkienASR` / `HokkienMT` / `HokkienTTS` are real `bt.Synapse` subclasses verifiable via `isinstance(s, bt.Synapse)` (see `tests/test_bt_protocol.py`).
+- **`languageark.chain` queries the live chain.** `python -m languageark.chain probe --network finney --netuid 1` reads real metagraph state and hyperparameters from finney/test/local.
+- **FLORES-200 data is real and downloaded.** 997 professional-translator sentence pairs in `data/flores/yue_Hant.dev` + `zho_Hans.dev`. Fetched from `dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz`.
+- **chrF++ and WER are real metrics.** From `sacrebleu`, the same package WMT uses.
+- **Glicko-2 is a real implementation.** Full Illinois-algorithm volatility update; tested for monotonicity, draws, and inactivity decay.
+- **Attack simulator behaves like real Yuma.** Power-law miner weights + drift-aware vTrust computation. 100% (vulnerable) vs 42% (with commit-reveal) is reproducible.
+- **38/51 tests are honest verifications** of the above — not assertions of mock state.
+
+## What's a TOY ⚠️
+
+These are real engineering gaps. A grant-funded continuation would close them.
+
+| Claim | Reality | What it would take to make real |
+|---|---|---|
+| "Hokkien speech subnet" | Zero real audio in the demo. No Whisper / SeamlessM4T model loaded. | ~2 hours to wire `facebook/seamless-m4t-v2-large` and feed Common Voice nan-tw audio. Limited by ~10 GB model download. |
+| "Hokkien validation corpus" | 10 hand-curated sentence pairs from MoE dictionary. FLORES-200 has no Hokkien (we use Cantonese as a proxy). | Long-term: build the corpus *via* the subnet's speaker DAO — that's the v1 product. Short-term: scrape Wikipedia zh-min-nan parallel articles. |
+| "Speaker DAO" | A JSON file with stake/attest fields. No real on-chain stake, no slashing. | A minimal Solidity contract using the Staking V2 precompile (`0x0000…0805`). ~80 lines, deployable to Subtensor EVM in an afternoon. |
+| "Commit-reveal" | The validator prints a SHA-256 hash; we don't actually wait 5 tempos. | The bittensor SDK has `subtensor.commit_weights(netuid, weights, salt)` and `reveal_weights()`. ~10 lines of wiring once a netuid is registered. |
+| "Mainnet btcli sheet" | `subnet_register.py` prints commands but never executes them. | Run them. Costs ~3,000+ TAO at current burn rates. We have a hackathon-budget. |
+| "MockGLMClient" | Character-set Jaccard similarity over a 60-pair corpus. NOT real back-translation. | Real GLM-4.6 API call (1 env var + ~$0.001/sentence). The code path already exists; just needs `ZHIPU_API_KEY`. |
+| "Yuma consensus simulator" | A 200-line Python model. Real Yuma is a Rust runtime pallet with substrate-level state. | Run an actual `subtensor --chain dev` node locally (fast-block mode, 250ms blocks). Documented in the SubtensorAPI docs but takes a day to wire reliably. |
+| "Per-miner outputs" | Deterministic character-dropout of the gold reference. NOT actual model outputs. | Load 3 different Hokkien Whisper checkpoints (small / medium / SeamlessM4T-v2) — get genuinely different translations. |
+
+## What we WOULD ship if this won
+
+In priority order, with rough effort estimates:
+
+1. **Real Whisper-Hokkien miner** (1 day): wire `seamless-m4t-v2-large` + load Common Voice nan-tw audio. Show real WER deltas across model sizes.
+2. **Local subtensor + real registration** (2 days): `docker run subtensor/subtensor:latest --chain dev`, register on a local testnet, run miner+validator extrinsics for real.
+3. **Speaker DAO contract** (1 day): minimal Solidity using Subtensor EVM precompiles; replace JSON shim.
+4. **Real GLM-4.6 evaluation pipeline** (4 hours): swap `MockGLMClient` for actual API calls, evaluate against held-out FLORES yue_Hant. Get sponsor-quality BLEU numbers.
+5. **Glicko-2 calibration** (4 hours): currently we use defaults; measure against a real annotated dataset.
+6. **Recruit 5 actual Hokkien speakers** (~weeks of outreach to orgs listed in `partners.md`) — sign LOIs, run a tiny live trial.
+
+## Why this is still a winning ideathon submission
+
+The judging rubric (`产品力 / 组织力 / 验证力 / 博弈力`) explicitly weights **mechanism design over coding**.
+
+What we have proves we understand the mechanism *enough to compile it to code*:
+
+- Real `bt.Synapse` types prove we know the chain interface
+- Real FLORES + chrF++ proves we know modern MT eval
+- Glicko-2 implementation proves we know speaker-rating theory
+- The attack simulator proves we know which hyperparam defeats which attack
+- The btcli command sheet proves we can express our design as on-chain operations
+
+What we *don't* have is a production deployment — and the ideathon explicitly says that's not what they're judging.
+
+This document exists so judges who do a code-review don't catch us pretending otherwise.

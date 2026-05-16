@@ -16,20 +16,18 @@ from pathlib import Path
 import click
 
 
-from .eval_samples import ALL_MINERS
+from .eval_samples import generate_miner_outputs, hokkien_eval_set
 
 
 def run_mock(uid: int, out_path: Path) -> None:
-    """Write {uid: {hokkien: mandarin}} that validator.py picks up.
+    """Generate this miner's outputs by deterministic noise over the eval set.
 
-    Different uids deliberately produce different quality outputs so the
-    composite score actually differentiates miners on all 3 signals:
-      uid=0 professional, uid=1 competent, uid=2 poor.
+    uid=0 professional · uid=1 competent · uid=2 poor.
+    Now driven by `generate_miner_outputs()` — no hand-crafted strings.
     """
-    outputs = ALL_MINERS.get(uid)
-    if outputs is None:
-        # For uids beyond our preset, fall back to professional outputs
-        outputs = ALL_MINERS[0]
+    samples = hokkien_eval_set()
+    all_outputs = generate_miner_outputs(samples)
+    outputs = all_outputs.get(uid, all_outputs[0])
     out_path.parent.mkdir(parents=True, exist_ok=True)
     existing = json.loads(out_path.read_text()) if out_path.exists() else {}
     existing[str(uid)] = outputs

@@ -113,19 +113,21 @@ class MockGLMClient:
     """
 
     def __init__(self) -> None:
-        # Lazy import to avoid circular reference
-        from .eval_samples import EVAL_SAMPLES_NAN
-        self._samples = EVAL_SAMPLES_NAN
+        from .flores_loader import HOKKIEN_PAIRS, is_available, load_flores_pairs
+        # Use Hokkien pairs + real FLORES Cantonese as the lookup corpus
+        self._samples = [(p.mandarin, p.hokkien_han) for p in HOKKIEN_PAIRS]
+        if is_available():
+            for fp in load_flores_pairs("yue_Hant", "zho_Hans")[:50]:
+                self._samples.append((fp.tgt_text, fp.src_text))
 
     async def translate(self, text: str, src_lang: str, tgt_lang: str) -> TranslationResult:
-        # Find closest gold-Mandarin → return its Hokkien source
-        best = max(self._samples, key=lambda s: _char_overlap(text, s.mandarin_gold))
-        score = _char_overlap(text, best.mandarin_gold)
-        # If overlap is low, we return a degraded match so BLEU stays low
+        # Find closest gold-Mandarin → return paired non-Mandarin
+        best_zh, best_src = max(self._samples, key=lambda pair: _char_overlap(text, pair[0]))
+        score = _char_overlap(text, best_zh)
         if score < 0.3:
-            translation = best.hokkien[: max(2, len(best.hokkien) // 2)]
+            translation = best_src[: max(2, len(best_src) // 2)]
         else:
-            translation = best.hokkien
+            translation = best_src
         return TranslationResult(
             src=src_lang, tgt=tgt_lang, translation=translation, model="mock-glm"
         )
