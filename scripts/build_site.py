@@ -240,32 +240,79 @@ TEMPLATE = """<!doctype html>
     <p style="color:var(--fg-2);margin-bottom:0">No code changes required for this pivot — only the pitch. The Solidity DAO, the FLORES eval, the GLM/Claude judge, the Glicko-2 implementation all generalize to any language pair with a stake-bonded speaker community. The new framing also opens up a stronger "Phase 2" expansion path: once Hokkien is shipped, the same protocol scales to <em>every</em> Chinese-language pair (an order-of-magnitude larger TAM than endangered-only), then to <em>every</em> language pair globally.</p>
   </div></div>
 
-  <h2><span class="num">0c</span>ELI5 — every jargon term, in one sentence</h2>
+  <h2><span class="num">0c</span>ELI5 — every jargon term, in one sentence (with sources)</h2>
   <div class="card"><div class="card-body" style="padding:20px 22px">
-    <p style="margin-top:0;color:var(--fg-2)">If you're not deep in Bittensor / NLP, skim this first — every term that appears anywhere on this site is defined here in plain English.</p>
+    <p style="margin-top:0;color:var(--fg-2)">If you're not deep in Bittensor / NLP, skim this first — every term that appears anywhere on this site is defined here in plain English, with the canonical primary source linked.</p>
     <dl style="margin:6px 0 0;display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;font-size:14px;line-height:1.55">
-      <dt style="font-weight:600">Bittensor</dt><dd style="margin:0;color:var(--fg-2)">A blockchain whose only purpose is to pay AI workers. Each "subnet" pays a different kind of work (image-gen, code, prompting…). We propose a new subnet that pays language-preservation work.</dd>
-      <dt style="font-weight:600">Subnet</dt><dd style="margin:0;color:var(--fg-2)">A self-contained market on Bittensor: miners do work, validators grade it, the chain mints tokens (TAO) and splits them according to grades.</dd>
+      <dt style="font-weight:600">Bittensor</dt><dd style="margin:0;color:var(--fg-2)">A blockchain whose only purpose is to pay AI workers. Each "subnet" pays a different kind of work (image-gen, code, prompting…). We propose a new subnet that pays language-preservation work. → <a href="https://docs.learnbittensor.org/" target="_blank" rel="noopener">docs.learnbittensor.org</a> · <a href="https://github.com/opentensor/bittensor" target="_blank" rel="noopener">SDK</a></dd>
+      <dt style="font-weight:600">Subnet</dt><dd style="margin:0;color:var(--fg-2)">A self-contained market on Bittensor: miners do work, validators grade it, the chain mints tokens (TAO) and splits them by grade. → <a href="https://docs.learnbittensor.org/" target="_blank" rel="noopener">docs</a></dd>
       <dt style="font-weight:600">TAO</dt><dd style="margin:0;color:var(--fg-2)">The Bittensor token. Both the unit of payment and the unit of stake (skin-in-the-game).</dd>
       <dt style="font-weight:600">Miner</dt><dd style="margin:0;color:var(--fg-2)">Anyone running an AI model that serves requests. In our subnet: someone running a Hokkien speech-to-text or translation model.</dd>
-      <dt style="font-weight:600">Validator</dt><dd style="margin:0;color:var(--fg-2)">Anyone running scoring code. They quiz miners, grade outputs, and submit weights to the chain. Their stake gets slashed if they cheat.</dd>
-      <dt style="font-weight:600">Yuma consensus</dt><dd style="margin:0;color:var(--fg-2)">Bittensor's algorithm for combining many validators' weights into one truth-of-the-network, while penalising outliers. Like a robust median, on-chain.</dd>
+      <dt style="font-weight:600">Validator</dt><dd style="margin:0;color:var(--fg-2)">Anyone running scoring code. They quiz miners, grade outputs, submit weights to the chain. Stake gets slashed if they cheat.</dd>
+      <dt style="font-weight:600">Yuma consensus</dt><dd style="margin:0;color:var(--fg-2)">Bittensor's algorithm for combining many validators' weights into one truth-of-the-network, while penalising outliers. Like a robust median, on-chain. → <a href="https://docs.learnbittensor.org/learn/yuma-consensus" target="_blank" rel="noopener">Yuma docs</a></dd>
       <dt style="font-weight:600">Tempo</dt><dd style="margin:0;color:var(--fg-2)">One scoring round. 360 blocks ≈ 72 minutes on Bittensor's mainnet.</dd>
-      <dt style="font-weight:600">Commit-reveal</dt><dd style="margin:0;color:var(--fg-2)">Validators first publish a sealed hash of their weights, then reveal the real weights ~6 hours later. Prevents a parasite from copying everyone else's grades in real time.</dd>
-      <dt style="font-weight:600">Synapse</dt><dd style="margin:0;color:var(--fg-2)">A typed RPC message between validator and miner on Bittensor. Our <code>HokkienASR</code>, <code>HokkienMT</code>, <code>HokkienTTS</code> are real <code>bt.Synapse</code> subclasses.</dd>
-      <dt style="font-weight:600">Hokkien (Min Nan, ISO <code>nan</code>)</dt><dd style="margin:0;color:var(--fg-2)">The language spoken in Fujian, Taiwan, and a 50 M-strong diaspora across SG/MY/PH/ID. No standard writing system, very little ML coverage — Meta themselves picked it as the hardest mainstream low-resource language.</dd>
-      <dt style="font-weight:600">FLORES-200</dt><dd style="margin:0;color:var(--fg-2)">Meta's gold-standard machine-translation benchmark: 997 sentences professionally translated into 200 languages. We use the Cantonese ↔ Mandarin pair as a proxy (Hokkien isn't in FLORES — that absence is part of the market opportunity).</dd>
-      <dt style="font-weight:600">chrF++ / WER</dt><dd style="margin:0;color:var(--fg-2)">chrF++ scores character-level overlap (good for Chinese); WER = Word Error Rate (good for ASR). Both come from <code>sacrebleu</code> — the same library WMT uses.</dd>
-      <dt style="font-weight:600">Back-translation BLEU</dt><dd style="margin:0;color:var(--fg-2)">Translate Hokkien → English with the miner's model, then back English → Hokkien with an independent LLM (GLM-4.6 or Claude). If the round-trip preserves meaning, the miner is good. Cheap, language-agnostic, hard to fake.</dd>
-      <dt style="font-weight:600">Glicko-2</dt><dd style="margin:0;color:var(--fg-2)">A rating system (like chess Elo, but with uncertainty + activity decay). Native speakers vote pairwise on miner translations; ratings update by Glicko-2.</dd>
-      <dt style="font-weight:600">Speaker DAO</dt><dd style="margin:0;color:var(--fg-2)">A per-language committee of stake-bonded native speakers. To join: stake 100 TAO + get 2 of 3 existing members to attest you're a real fluent speaker. Slash if you Sybil.</dd>
-      <dt style="font-weight:600">Sybil attack</dt><dd style="margin:0;color:var(--fg-2)">One attacker pretending to be many users. Our defence: stake gate + multi-attestation + geographic-distribution requirement.</dd>
-      <dt style="font-weight:600">κ-clipping</dt><dd style="margin:0;color:var(--fg-2)">The Yuma rule that caps how far a validator's weights can drift from the cluster median. We set κ = 0.6 (above default 0.5) — a cabal needs &gt; 60 % of stake to move consensus.</dd>
+      <dt style="font-weight:600">Commit-reveal</dt><dd style="margin:0;color:var(--fg-2)">Validators first publish a sealed hash of their weights, then reveal the real weights ~6 hours later. Prevents a parasite from copying everyone else's grades in real time. → <a href="https://docs.learnbittensor.org/concepts/commit-reveal" target="_blank" rel="noopener">commit-reveal</a></dd>
+      <dt style="font-weight:600">Synapse</dt><dd style="margin:0;color:var(--fg-2)">A typed RPC message between validator and miner on Bittensor. Our <code>HokkienASR</code>, <code>HokkienMT</code>, <code>HokkienTTS</code> are real <code>bt.Synapse</code> subclasses. → <a href="https://github.com/edwardtay/bittensor-languagearkcn/blob/master/languageark/bt_protocol.py" target="_blank" rel="noopener">our code</a></dd>
+      <dt style="font-weight:600">Hokkien (Min Nan, ISO <code>nan</code>)</dt><dd style="margin:0;color:var(--fg-2)">The language spoken in Fujian, Taiwan, and a 50 M-strong diaspora across SG/MY/PH/ID. No standard writing system, very little ML coverage — Meta themselves picked it as the hardest mainstream low-resource language. → <a href="https://about.fb.com/news/2022/10/hokkien-ai-speech-translation/" target="_blank" rel="noopener">Meta SeamlessM4T Hokkien announcement (Oct 2022)</a> · <a href="https://commonvoice.mozilla.org/nan-tw" target="_blank" rel="noopener">Common Voice nan-tw</a></dd>
+      <dt style="font-weight:600">FLORES-200</dt><dd style="margin:0;color:var(--fg-2)">Meta's gold-standard machine-translation benchmark: 997 sentences professionally translated into 200 languages. We use the Cantonese ↔ Mandarin pair as a proxy (Hokkien isn't in FLORES — that absence is part of the market opportunity). → <a href="https://github.com/facebookresearch/flores" target="_blank" rel="noopener">flores</a></dd>
+      <dt style="font-weight:600">chrF++ / WER</dt><dd style="margin:0;color:var(--fg-2)">chrF++ scores character-level overlap (good for Chinese); WER = Word Error Rate (good for ASR). Both come from <code>sacrebleu</code> — the same library WMT uses. → <a href="https://github.com/mjpost/sacrebleu" target="_blank" rel="noopener">sacrebleu</a></dd>
+      <dt style="font-weight:600">Back-translation BLEU</dt><dd style="margin:0;color:var(--fg-2)">Translate Hokkien → English with the miner's model, then back English → Hokkien with an independent LLM (GLM-4.6 or Claude). If the round-trip preserves meaning, the miner is good. Cheap, language-agnostic, hard to fake. → <a href="https://aclanthology.org/D18-1045/" target="_blank" rel="noopener">Edunov et al., EMNLP 2018</a></dd>
+      <dt style="font-weight:600">Glicko-2</dt><dd style="margin:0;color:var(--fg-2)">A rating system (like chess Elo, but with uncertainty + activity decay). Native speakers vote pairwise on miner translations; ratings update by Glicko-2. → <a href="http://www.glicko.net/glicko/glicko2.pdf" target="_blank" rel="noopener">Glickman (2012) PDF</a></dd>
+      <dt style="font-weight:600">Speaker DAO</dt><dd style="margin:0;color:var(--fg-2)">A per-language committee of stake-bonded native speakers. To join: stake 100 TAO + get 2 of 3 existing members to attest you're a real fluent speaker. Slash if you Sybil. → <a href="https://github.com/edwardtay/bittensor-languagearkcn/blob/master/contracts/src/SpeakerDAO.sol" target="_blank" rel="noopener">our Solidity contract</a></dd>
+      <dt style="font-weight:600">Sybil attack</dt><dd style="margin:0;color:var(--fg-2)">One attacker pretending to be many users. Our defence: stake gate + multi-attestation + geographic-distribution requirement. → <a href="https://www.microsoft.com/en-us/research/publication/the-sybil-attack/" target="_blank" rel="noopener">Douceur (2002), original Sybil paper</a></dd>
+      <dt style="font-weight:600">κ-clipping</dt><dd style="margin:0;color:var(--fg-2)">The Yuma rule that caps how far a validator's weights can drift from the cluster median. We set κ = 0.6 (above default 0.5) — a cabal needs &gt; 60 % of stake to move consensus. → <a href="https://docs.learnbittensor.org/learn/yuma-consensus" target="_blank" rel="noopener">Yuma docs</a></dd>
       <dt style="font-weight:600">Liquid α</dt><dd style="margin:0;color:var(--fg-2)">How fast validator bonds adjust. Tight bounds (0.05–0.35) prevent whipsaw between tempos.</dd>
-      <dt style="font-weight:600">btcli</dt><dd style="margin:0;color:var(--fg-2)">The Bittensor command-line tool. Our <code>subnet_register.py</code> prints the exact <code>btcli</code> sequence that would register this subnet on mainnet.</dd>
-      <dt style="font-weight:600">Subtensor EVM</dt><dd style="margin:0;color:var(--fg-2)">The Solidity-compatible side of Bittensor. Lets us deploy the Speaker DAO contract on-chain. We test it on local <code>anvil</code>; the same bytecode would run on Subtensor EVM.</dd>
-      <dt style="font-weight:600">Mock-GLM / mock miner</dt><dd style="margin:0;color:var(--fg-2)">Deterministic heuristic stand-ins so the demo runs offline in 2.3 s. Real LLM judge + real Whisper / SeamlessM4T are wired and gate on an env var.</dd>
+      <dt style="font-weight:600">btcli</dt><dd style="margin:0;color:var(--fg-2)">The Bittensor command-line tool. Our <code>subnet_register.py</code> prints the exact <code>btcli</code> sequence that would register this subnet on mainnet. → <a href="https://github.com/opentensor/btcli" target="_blank" rel="noopener">btcli repo</a></dd>
+      <dt style="font-weight:600">Subtensor EVM</dt><dd style="margin:0;color:var(--fg-2)">The Solidity-compatible side of Bittensor. Lets us deploy the Speaker DAO contract on-chain. We test it on local <code>anvil</code>; the same bytecode would run on Subtensor EVM. → <a href="https://book.getfoundry.sh/" target="_blank" rel="noopener">Foundry book</a></dd>
+      <dt style="font-weight:600">Mock-GLM / mock miner</dt><dd style="margin:0;color:var(--fg-2)">Deterministic heuristic stand-ins so the demo runs offline in 2.3 s. Real LLM judge + real Whisper / SeamlessM4T are wired and gate on an env var. → <a href="https://open.bigmodel.cn/dev/api" target="_blank" rel="noopener">Zhipu GLM API</a> · <a href="https://docs.anthropic.com/" target="_blank" rel="noopener">Anthropic API</a></dd>
     </dl>
+  </div></div>
+
+  <h2><span class="num">0f</span>Sources &amp; references — what we built on</h2>
+  <div class="card"><div class="card-body" style="padding:20px 22px">
+    <h3 style="margin:0 0 6px;font-size:14px">Bittensor protocol</h3>
+    <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
+      <li><a href="https://docs.learnbittensor.org/" target="_blank" rel="noopener">docs.learnbittensor.org</a> — canonical protocol docs (Yuma, tempo, commit-reveal, liquid α, emission)</li>
+      <li><a href="https://github.com/opentensor/bittensor" target="_blank" rel="noopener">github.com/opentensor/bittensor</a> — Python SDK we import (v10.3.2)</li>
+      <li><a href="https://github.com/opentensor/btcli" target="_blank" rel="noopener">github.com/opentensor/btcli</a> — chain CLI; our <code>subnet_register.py</code> prints the exact sequence</li>
+      <li><a href="https://github.com/latent-to/bittensor-subnet-template" target="_blank" rel="noopener">latent-to/bittensor-subnet-template</a> — subnet skeleton</li>
+      <li><a href="https://github.com/macrocosm-os/apex" target="_blank" rel="noopener">macrocosm-os/apex</a> (SN1) · <a href="https://github.com/macrocosm-os/finetuning" target="_blank" rel="noopener">macrocosm-os/finetuning</a> (SN37) — reference architectures</li>
+    </ul>
+
+    <h3 style="margin:0 0 6px;font-size:14px">Hokkien / Min Nan research &amp; data</h3>
+    <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
+      <li><a href="https://about.fb.com/news/2022/10/hokkien-ai-speech-translation/" target="_blank" rel="noopener">Meta SeamlessM4T Hokkien S2ST (Oct 2022)</a> — the canonical low-resource S2ST paper that picked Hokkien</li>
+      <li><a href="https://github.com/facebookresearch/fairseq/tree/ust/examples/hokkien" target="_blank" rel="noopener">facebookresearch/fairseq · hokkien_translation</a> — open HK↔EN checkpoints</li>
+      <li><a href="https://commonvoice.mozilla.org/nan-tw" target="_blank" rel="noopener">Mozilla Common Voice — nan-tw (Taiwanese Hokkien)</a> — validation-corpus seed</li>
+      <li><a href="https://huggingface.co/models?search=whisper+hokkien" target="_blank" rel="noopener">Hugging Face — Whisper Hokkien fine-tunes</a></li>
+    </ul>
+
+    <h3 style="margin:0 0 6px;font-size:14px">MT &amp; speech benchmarks / metrics</h3>
+    <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
+      <li><a href="https://github.com/facebookresearch/flores" target="_blank" rel="noopener">facebookresearch/flores</a> — FLORES-200 benchmark (997 sentences × 200 languages)</li>
+      <li><a href="https://github.com/mjpost/sacrebleu" target="_blank" rel="noopener">mjpost/sacrebleu</a> — chrF++ / WER / BLEU implementation (WMT-standard)</li>
+      <li><a href="https://aclanthology.org/D18-1045/" target="_blank" rel="noopener">Edunov, Ott, Auli, Grangier — "Understanding Back-Translation at Scale" (EMNLP 2018)</a></li>
+      <li><a href="http://www.glicko.net/glicko/glicko2.pdf" target="_blank" rel="noopener">Glickman — "Example of the Glicko-2 system" (2012, PDF)</a></li>
+    </ul>
+
+    <h3 style="margin:0 0 6px;font-size:14px">LLM judges &amp; sponsor APIs</h3>
+    <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
+      <li><a href="https://open.bigmodel.cn/dev/api" target="_blank" rel="noopener">Zhipu GLM-4.6 API</a> — sponsor; primary judge when <code>ZHIPU_API_KEY</code> is set</li>
+      <li><a href="https://docs.anthropic.com/" target="_blank" rel="noopener">Anthropic Claude API</a> — fallback judge when <code>ANTHROPIC_API_KEY</code> is set</li>
+    </ul>
+
+    <h3 style="margin:0 0 6px;font-size:14px">Policy &amp; buyer-side</h3>
+    <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
+      <li><a href="https://en.wikipedia.org/wiki/UNESCO_Atlas_of_the_World%27s_Languages_in_Danger" target="_blank" rel="noopener">UNESCO Atlas of the World's Languages in Danger</a> (overview)</li>
+      <li><a href="https://commonvoice.mozilla.org/" target="_blank" rel="noopener">Mozilla Common Voice</a> · <a href="https://foundation.mozilla.org/" target="_blank" rel="noopener">Mozilla Foundation</a> (grant programmes)</li>
+      <li><a href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E8%AF%AD%E8%A8%80%E8%B5%84%E6%BA%90%E4%BF%9D%E6%8A%A4%E5%B7%A5%E7%A8%8B" target="_blank" rel="noopener">中国语言资源保护工程</a> — MOE / State Language Commission programme of record for dialect preservation, launched 2015 (Chinese Wikipedia article).</li>
+    </ul>
+
+    <h3 style="margin:0 0 6px;font-size:14px">Event &amp; sponsors</h3>
+    <ul style="margin:0;padding-left:20px;color:var(--fg-2)">
+      <li><a href="https://www.hackquest.io/" target="_blank" rel="noopener">HackQuest</a> + <a href="https://themu.xyz/" target="_blank" rel="noopener">The Mu</a> — Proof of Intelligence ideathon organisers, Shanghai 2026-05-23</li>
+      <li>Sponsors: Zhipu (GLM API credits) · Alibaba Cloud (compute credits)</li>
+    </ul>
   </div></div>
 
   <h2><span class="num">0d</span>ELI5 — the demo in 7 plain sentences</h2>
