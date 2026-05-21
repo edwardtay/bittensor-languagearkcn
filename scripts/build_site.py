@@ -302,7 +302,7 @@ TEMPLATE = """<!doctype html>
     <ul style="margin:6px 0 18px;padding-left:20px;color:var(--fg-2)">
       <li><strong>Recurring buyers.</strong> Mozilla Common Voice, the State Language Commission's 5-year plan line item for 数字化方言, UNESCO endangered-language grants, and the Chinese-language-AI teams at iFlytek / Baidu / Alibaba all already pay for this data — just inefficiently and to different vendors.</li>
       <li><strong>Diaspora willingness-to-pay.</strong> 50 M Hokkien speakers globally (Fujian, Taiwan, SG, MY, PH, ID). Heritage-language apps (HiNative, Drops, Tandem) want conversation models. Direct revenue, not grants.</li>
-      <li><strong>Policy tailwind.</strong> Cultural-heritage digitisation is named in the 14th Five-Year Plan (2021-2025) Chapter 33 / Section 2 on 中华优秀传统文化. The State Language Commission's <em>语言资源保护工程</em> (Chinese Language Resources Protection Project, launched 2015 by MOE) is the existing programme-of-record for dialect preservation — there is a budget owner with a multi-year history. Specific line-item RMB figures should be sourced before any sales call.</li>
+      <li><strong>Policy tailwind.</strong> The State Language Commission's <em>中国语言资源保护工程</em> (Chinese Language Resources Protection Project, launched by MOE/SLC in 2015) is the existing programme-of-record for dialect and minority-language preservation — a budget owner with a decade-long history. Cultural-heritage and intangible-culture preservation also appear in the 14th Five-Year Plan's cultural-sector chapters. Specific RMB line-items should be sourced before any sales conversation.</li>
     </ul>
 
     <h3 style="margin:18px 0 6px;font-size:15px">Unit economics — back-of-the-envelope</h3>

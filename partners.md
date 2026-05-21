@@ -22,7 +22,7 @@ The hackathon pitch claims real recruitment intent, so this list is grounded in 
 | **教育部 國語推行委員會 / 本土語言組** | Government | Official Taiwanese-Hokkien certification (`閩南語認證`) — natural pool of attested speakers |
 | **臺灣大學 臺灣文學所** (NTU Taiwan Lit) | Academic | Strong POJ + Han-mixed-script research; SeamlessM4T evaluation co-authors |
 | **公共電視 台語台** (PTS Taiwanese channel) | Broadcasters | Professional speakers; built-in audio archive for FLORES-style eval set |
-| **Lím Phín-jîn 林品任 / 母語復興運動** | Activist orgs | Established Hokkien-rights advocacy; mobilizable speaker base |
+| **母語復興運動** (Taiwanese mother-tongue revival groups) | Activist orgs | Established Hokkien-rights advocacy; mobilisable speaker base |
 
 ### Singapore (target: 10 speakers)
 
@@ -44,9 +44,9 @@ The hackathon pitch claims real recruitment intent, so this list is grounded in 
 
 Ranked by likelihood of yielding a signable LOI within 30 days of pitch.
 
-1. **Mozilla Common Voice** (highest) — volunteer-validation pipeline; we plug in as a *high-throughput, paid* lane that submits in their existing format. Adjacent funder: Mozilla Foundation Technology Fund (has funded corpus-collection grants historically).
-2. **iFlytek 科大讯飞** — has a Hokkien speech-AI product in development (2024 announcement); buys training data
-3. **Penang state gov.** — Penang Hokkien is officially endangered; small but symbolic procurement
+1. **Mozilla Common Voice** (highest) — volunteer-validation pipeline; we plug in as a *high-throughput, paid* lane that submits in their existing format. Mozilla Foundation runs grant programmes adjacent to open-data / open-source AI; specific funding fit to be confirmed in conversation.
+2. **iFlytek 科大讯飞** — Chinese-speech-AI leader; known to be expanding low-resource Sinitic coverage; speech-data procurement is a standard line item. (Specific Hokkien-product claim removed pending a verifiable announcement to cite.)
+3. **Penang state gov.** — Penang Hokkien is a distinct variety with documented decline in intergenerational transmission; state-level cultural-heritage budget exists. Small ticket but symbolic.
 4. **UNESCO Atlas of Endangered Languages** — grant program, slow but reputational
 5. **Singapore Hokkien Huay Kuan** — cultural-preservation budget; small ticket but PR-friendly
 6. **Baidu / Alibaba speech teams** — long sales cycle, large ticket

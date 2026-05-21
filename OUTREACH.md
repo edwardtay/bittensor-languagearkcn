@@ -81,7 +81,7 @@ Goal before the Shanghai pitch (May 23): **one Tier-A reply on the record**, eve
 >
 > Hi ___,
 >
-> Your team's 2024 Hokkien speech-AI announcement suggests an internal data line for low-resource Chinese languages. I run **LanguageArk-CN**, a Bittensor subnet that will produce validated Hokkien ASR/MT/TTS corpora — gated by a stake-bonded speaker DAO, scored on FLORES-200 + native-speaker Elo + back-translation BLEU.
+> Your team works on Chinese-language speech AI, including low-resource Sinitic varieties. I run **LanguageArk-CN**, a Bittensor subnet that will produce validated Hokkien ASR/MT/TTS corpora — gated by a stake-bonded speaker DAO, scored on FLORES-200 + native-speaker Elo + back-translation BLEU. (Customising this template before sending — happy to align it to any public statements your team has made about Hokkien / Min Nan specifically.)
 >
 > Asking for **15 minutes**, post our 2026-05-23 Shanghai launch, to walk through:
 > - the per-minute price point we'd need to clear
