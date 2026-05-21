@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # 90-second scripted demo for the Shanghai judging floor.
 # Runs end-to-end with or without ZHIPU_API_KEY (mock-GLM fallback).
-set -euo pipefail
+set -eu
+# Note: NOT pipefail — we `| head` several outputs and don't want SIGPIPE to exit.
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"

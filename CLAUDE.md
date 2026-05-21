@@ -104,7 +104,7 @@ Use `glm-4.6` model via `https://open.bigmodel.cn/api/paas/v4/chat/completions`.
 ├── whitepaper.md        ← full mechanism design
 ├── pyproject.toml       ← uv/poetry config
 ├── languageark/
-│   ├── protocol.py      ← Synapse types (ASRSynapse, BackTranslateSynapse)
+│   ├── bt_protocol.py   ← real bt.Synapse types (HokkienASR / MT / TTS)
 │   ├── miner.py         ← reference miner (Whisper-small Hokkien)
 │   ├── validator.py     ← scoring pipeline w/ GLM + FLORES + Elo
 │   ├── scoring.py       ← the composite score function
@@ -114,7 +114,7 @@ Use `glm-4.6` model via `https://open.bigmodel.cn/api/paas/v4/chat/completions`.
 ├── tests/
 │   ├── test_scoring.py
 │   ├── test_glm_client.py
-│   └── test_protocol.py
+│   └── test_bt_protocol.py
 ├── docker-compose.yml   ← local subtensor + miner + validator
 ├── demo.sh              ← 90s scripted demo
 └── slides/
@@ -138,7 +138,7 @@ Use `glm-4.6` model via `https://open.bigmodel.cn/api/paas/v4/chat/completions`.
 - [ ] `slides/pitch.md` — 8-slide deck
 
 ### Phase 2 — Working prototype (Hokkien only)
-- [ ] `protocol.py` — Synapse types
+- [ ] `bt_protocol.py` — bt.Synapse types
 - [ ] `scoring.py` — composite score function (deterministic, unit-tested)
 - [ ] `glm_client.py` — Zhipu GLM-4.6 API wrapper
 - [ ] `elo.py` — Glicko-2
@@ -188,39 +188,16 @@ Use `glm-4.6` model via `https://open.bigmodel.cn/api/paas/v4/chat/completions`.
 - Meta `hokkien_translation` repo: https://github.com/facebookresearch/fairseq/tree/ust/examples/hokkien
 - The intel report this came from: `/home/edwardtay/2-projects/bittensor/README.md` (sections: Ideathon, Builder Advanced)
 
-## Current status (updated 2026-05-16, v2)
+## Current status (updated 2026-05-21, v3)
 
-| Deliverable | Status |
-|---|---|
-| CLAUDE.md (steering doc) | ✅ |
-| README.md (lead with win story) | ✅ |
-| whitepaper.md (9-section mechanism design) | ✅ |
-| partners.md (Hokkien diaspora orgs) | ✅ |
-| pyproject.toml + venv installable | ✅ |
-| `languageark/protocol.py` Synapse types | ✅ |
-| `languageark/scoring.py` composite score | ✅ |
-| `languageark/glm_client.py` Zhipu GLM-4.6 + MockGLM heuristic fallback | ✅ |
-| `languageark/elo.py` Glicko-2 | ✅ |
-| `languageark/speaker_dao.py` 2-of-3 attestation registry | ✅ |
-| `languageark/eval_samples.py` 8 Hokkien sentences + 3 quality tiers | ✅ |
-| `languageark/miner.py` differentiated mock outputs | ✅ |
-| `languageark/validator.py` end-to-end pipeline w/ commit-reveal hash | ✅ |
-| **`languageark/attack.py` weight-copy simulator (100% vs 42% knockout)** | ✅ |
-| **`languageark/subnet_register.py` btcli command sheet** | ✅ |
-| `languageark/cli_bootstrap.py` seed DAO | ✅ |
-| `demo.sh` 7-step demo (runs in 5s, no API key) | ✅ |
-| `slides/pitch.md` 13-slide marp deck | ✅ |
-| `tests/` **38/38 passing** | ✅ |
-| Whisper-small Hokkien real wiring | ⏳ stretch |
-| Live GLM-4.6 demo with real ZHIPU_API_KEY | ⏳ — get key from sponsor at event |
-| Recorded asciicast fallback video | ⏳ optional |
+Submission-ready. Docs: README, whitepaper, partners, OPS, HONESTY. Code: 57 pytest + 8 forge = **65/65 passing**. Live finney-readable chain probe, real FLORES-200 (997 yue↔zho pairs), real chrF++/WER, Glicko-2, Yuma attack sim, on-chain SpeakerDAO (Foundry), Claude + GLM judges. Static site builds from artifacts (`scripts/build_site.py`); custom favicon/logo (`site/favicon.svg`); docker-compose for offline demo.
 
-The pitch is **submission-ready**. Remaining stretch items for the actual judging:
+Stretch / event-day only:
 
-1. **At the event:** get `ZHIPU_API_KEY` from Zhipu sponsor booth. `export ZHIPU_API_KEY=...` then re-run `bash demo.sh` to show real GLM-4.6 lighting up the BLEU column. (Mock fallback already covers this if key is unavailable.)
-2. **Optional polish:** wire `miner.py --mode=whisper` to `facebook/seamless-m4t-v2-large` (which has Hokkien support out of the box) — adds visual flair of seeing a real model produce real translations.
-3. **Render slides:** `npx @marp-team/marp-cli slides/pitch.md --pdf` for the projector.
-4. **Record fallback:** `asciinema rec` the demo and host on asciinema.org so a network outage at the venue can't kill the live demo.
+1. `export ZHIPU_API_KEY=…` from sponsor booth → re-run `demo.sh` to swap Claude judge for GLM-4.6.
+2. `python -m languageark.seamless_miner` on a GPU box → real Hokkien translations (9.5 GB VRAM).
+3. `npx @marp-team/marp-cli slides/pitch.md --pdf` for projector.
+4. `asciinema rec` the demo as network-outage fallback.
 
 ## Decisions log
 

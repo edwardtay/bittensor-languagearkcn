@@ -83,7 +83,32 @@ async def score_one_miner(
     }
 
 
-async def main_async(eval_set: str, dao_path: Path) -> None:
+def _make_dao(backend: str, json_path: Path, rpc_url: str, contract_address: str | None):
+    """Build the speaker DAO the validator scores against.
+
+    backend='json'    → file-backed SpeakerDAO (default, used in unit tests + demo).
+    backend='onchain' → OnChainSpeakerDAO talking to a deployed Solidity contract.
+    """
+    if backend == "json":
+        return SpeakerDAO(json_path)
+    if backend == "onchain":
+        from .speaker_dao_chain import OnChainSpeakerDAO, connect
+        if not contract_address:
+            raise click.ClickException(
+                "--dao-contract is required when --dao-backend=onchain"
+            )
+        w3 = connect(rpc_url)
+        return OnChainSpeakerDAO(w3, contract_address)
+    raise click.ClickException(f"unknown dao backend: {backend!r}")
+
+
+async def main_async(
+    eval_set: str,
+    dao_path: Path,
+    dao_backend: str,
+    dao_rpc: str,
+    dao_contract: str | None,
+) -> None:
     # 1. Pick the eval set
     if eval_set == "hokkien":
         samples = hokkien_eval_set()
@@ -100,20 +125,35 @@ async def main_async(eval_set: str, dao_path: Path) -> None:
             "Did you fetch FLORES? See data/flores/README.md"
         )
 
-    # 2. Synthetic miner outputs from the real samples (deterministic noise)
+    # 2. Synthetic miner outputs from the real samples (deterministic noise) +
+    #    optional REAL miner outputs from disk (e.g. Claude / NLLB miners).
     all_miner_outputs = generate_miner_outputs(samples)
+    real_path = Path("data/real_miner_outputs.json")
+    if real_path.exists():
+        loaded = json.loads(real_path.read_text())
+        for uid_str, preds in loaded.items():
+            uid = int(uid_str)
+            if any(s.source_text in preds for s in samples):
+                all_miner_outputs[uid] = preds
+                click.echo(f"   + loaded REAL miner uid={uid} from {real_path} "
+                           f"({len(preds)} predictions)")
 
     # 3. GLM client (real if ZHIPU_API_KEY present, else heuristic mock)
     glm = make_glm()
     glm_kind = "GLM-4.6 (live)" if isinstance(glm, GLMClient) else "mock-heuristic (offline)"
 
-    dao = SpeakerDAO(dao_path)
+    dao = _make_dao(dao_backend, dao_path, dao_rpc, dao_contract)
+    dao_label = (
+        f"on-chain @ {dao_contract[:10]}…  (RPC {dao_rpc})"
+        if dao_backend == "onchain" else f"json @ {dao_path}"
+    )
 
     lang = "nan" if eval_set == "hokkien" else "yue"
     click.echo(f"\n🎯 LanguageArk-CN validator")
     click.echo(f"   eval set : {set_label}")
     click.echo(f"   metric   : chrF++ (modern MT eval)")
     click.echo(f"   back-trans: {glm_kind}")
+    click.echo(f"   dao      : {dao_label}")
     click.echo(f"   lang     : {lang}")
     click.echo()
 
@@ -157,9 +197,15 @@ async def main_async(eval_set: str, dao_path: Path) -> None:
 @click.option("--eval-set", type=click.Choice(["hokkien", "flores-yue"]),
               default="hokkien", help="Which eval corpus to score against.")
 @click.option("--dao-path", type=click.Path(path_type=Path), default=Path("data/speaker_dao.json"))
-def main(eval_set: str, dao_path: Path) -> None:
+@click.option("--dao-backend", type=click.Choice(["json", "onchain"]), default="json",
+              help="`json` = file-backed shim (default); `onchain` = deployed Solidity contract.")
+@click.option("--dao-rpc", default="http://127.0.0.1:8545",
+              help="EVM RPC URL when --dao-backend=onchain.")
+@click.option("--dao-contract", default=None,
+              help="Deployed SpeakerDAO address (required when --dao-backend=onchain).")
+def main(eval_set: str, dao_path: Path, dao_backend: str, dao_rpc: str, dao_contract: str | None) -> None:
     """Run one tempo of validator scoring."""
-    asyncio.run(main_async(eval_set, dao_path))
+    asyncio.run(main_async(eval_set, dao_path, dao_backend, dao_rpc, dao_contract))
 
 
 if __name__ == "__main__":

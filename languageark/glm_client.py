@@ -141,8 +141,65 @@ def _char_overlap(a: str, b: str) -> float:
     return len(sa & sb) / max(1, len(sa | sb))
 
 
-def make_glm() -> GLMClient | MockGLMClient:
-    """Factory: real GLM if ZHIPU_API_KEY is set, otherwise the heuristic mock."""
+class AnthropicJudge:
+    """Real LLM back-translation judge via Anthropic Claude.
+
+    Used when ZHIPU_API_KEY isn't available but ANTHROPIC_API_KEY is. Same
+    interface as GLMClient (`translate(text, src_lang, tgt_lang)`), so the
+    validator doesn't care which one it's holding.
+    """
+
+    DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+
+    def __init__(self, api_key: str | None = None, model: str | None = None) -> None:
+        from anthropic import AsyncAnthropic  # local import — optional dep
+
+        key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+        if not key:
+            raise GLMError("ANTHROPIC_API_KEY not set")
+        self._client = AsyncAnthropic(api_key=key)
+        self._model = model or self.DEFAULT_MODEL
+
+    async def translate(
+        self,
+        text: str,
+        src_lang: str,
+        tgt_lang: str,
+        *,
+        temperature: float = 0.0,
+    ) -> TranslationResult:
+        prompt = (
+            f"Translate the following text from {long_name(src_lang)} to "
+            f"{long_name(tgt_lang)}. Output ONLY the translation — no quotes, "
+            f"no commentary, no explanation. Keep proper nouns. Preserve register.\n\n"
+            f"Source: {text}"
+        )
+        resp = await self._client.messages.create(
+            model=self._model,
+            max_tokens=512,
+            temperature=temperature,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        # Anthropic returns a list of content blocks; the first should be text.
+        parts = [b.text for b in resp.content if getattr(b, "type", None) == "text"]
+        translation = ("".join(parts)).strip()
+        if not translation:
+            raise GLMError(f"Empty Anthropic response: {resp}")
+        return TranslationResult(
+            src=src_lang, tgt=tgt_lang, translation=translation, model=self._model
+        )
+
+
+def make_glm() -> GLMClient | "AnthropicJudge" | MockGLMClient:
+    """Factory: pick the best available real judge, fall back to mock.
+
+    Preference order:
+      1. ZHIPU_API_KEY      → real GLM-4.6 (sponsor key)
+      2. ANTHROPIC_API_KEY  → real Claude  (dev-time path; proves the pipeline)
+      3. (none)             → heuristic MockGLMClient
+    """
     if os.environ.get("ZHIPU_API_KEY"):
         return GLMClient()
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return AnthropicJudge()
     return MockGLMClient()

@@ -100,23 +100,26 @@ Concrete partner orgs (4 hubs: Fujian / Taiwan / Singapore / Penang) in [`partne
 
 ```
 languageark/
-  protocol.py        Synapse types (ASR, Translate, TTS — supports Han / POJ / TLPA)
-  scoring.py         deterministic composite score (11 tests)
-  glm_client.py      Zhipu GLM-4.6 client + heuristic MockGLM fallback (4 tests)
-  elo.py             Glicko-2 (6 tests)
-  speaker_dao.py     2-of-3 attestation registry (6 tests)
-  eval_samples.py    Hokkien sentences + 3-tier miner outputs (6 tests)
-  miner.py           mock + Whisper stub
-  validator.py       end-to-end scoring pipeline
-  attack.py          weight-copy attack simulator (5 tests)
-  subnet_register.py prints btcli registration command sheet
-  cli_bootstrap.py   seed demo DAO
-tests/               38/38 passing
-slides/pitch.md      13-slide marp deck — render with `marp slides/pitch.md --pdf`
-whitepaper.md        9-section mechanism design
-partners.md          Hokkien diaspora partner orgs
-demo.sh              90-second scripted demo (runs in 5s, no API key required)
-CLAUDE.md            steering doc for follow-on sessions
+  bt_protocol.py     real bt.Synapse types (ASR / MT / TTS, Han + POJ + TLPA)
+  chain.py           live finney/test/local metagraph probe
+  scoring.py         composite score (0.4·Elo + 0.3·BLEU + 0.3·FLORES)
+  glm_client.py      Zhipu GLM-4.6 + Anthropic Claude judge + mock fallback
+  elo.py             Glicko-2 (Illinois volatility)
+  metrics.py         chrF++ / WER via sacrebleu
+  flores_loader.py   997 yue_Hant ↔ zho_Hans FLORES-200 pairs
+  eval_samples.py    Hokkien curated pairs + 3-tier miner outputs
+  speaker_dao.py     2-of-3 attestation registry (JSON shim)
+  miner.py · claude_miner.py · nllb_miner.py · seamless_miner.py
+  validator.py       end-to-end scoring pipeline (mock + on-chain modes)
+  attack.py          Yuma weight-copy simulator (100% vs 42% knockout)
+  subnet_register.py btcli mainnet command sheet
+contracts/           Foundry: SpeakerDAO.sol (stake + attest + slash + rating)
+scripts/             build_site.py, deploy_speaker_dao_local.py, validator_e2e_onchain.py
+tests/               57 pytest + 8 forge = 65 passing
+slides/pitch.md      13-slide marp deck
+whitepaper.md · partners.md · OPS.md · HONESTY.md
+demo.sh              7-step demo, ~5s, no API key required
+docker-compose.yml   site + (stub) subtensor + miner + validator
 ```
 
 ## Roadmap

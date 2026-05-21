@@ -1,0 +1,26 @@
+# Minimal local dev stack. Real subtensor + GPU miner are stretch goals
+# (commented). The default `up` serves the static site so judges can poke
+# around offline.
+services:
+  site:
+    image: nginx:alpine
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+
+  # Uncomment to wire the prototype miner + validator pair (no chain).
+  # miner:
+  #   build: .
+  #   command: python -m languageark.miner --mode=mock --port 8091
+  #   ports: ["8091:8091"]
+  # validator:
+  #   build: .
+  #   command: python -m languageark.validator --eval-set hokkien
+  #   depends_on: [miner]
+
+  # Stretch: real subtensor dev node (250ms fast-blocks). Pulls ~1.5 GB.
+  # subtensor:
+  #   image: opentensorfdn/subtensor:latest
+  #   command: --chain dev --rpc-external --ws-external
+  #   ports: ["9944:9944", "9933:9933"]

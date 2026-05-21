@@ -1,0 +1,1020 @@
+"""Build the static `site/` dashboard from the latest run artifacts.
+
+Inputs:
+  /tmp/demo_full.out   — output of `bash demo.sh`
+  /tmp/dao_deploy.log  — output of `python scripts/deploy_speaker_dao_local.py`
+  /tmp/forge.log       — output of `forge test`
+  /tmp/pytest.log      — output of `pytest -v`
+
+Output:
+  site/index.html
+"""
+from __future__ import annotations
+
+import html
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent
+SITE = ROOT / "site"
+NOTES = SITE / "notes"
+SITE.mkdir(exist_ok=True)
+NOTES.mkdir(exist_ok=True)
+
+
+def read(p: str) -> str:
+    return Path(p).read_text() if Path(p).exists() else ""
+
+
+demo = read("/tmp/demo_full.out")
+dao = read("/tmp/dao_deploy.log")
+forge = read("/tmp/forge.log")
+pytest_out = read("/tmp/pytest.log")
+onchain = read("/tmp/onchain_validator.log")
+honesty = (ROOT / "HONESTY.md").read_text()
+readme = (ROOT / "README.md").read_text() if (ROOT / "README.md").exists() else ""
+
+TEMPLATE = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LanguageArk-CN — Hokkien subnet</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {{
+    --bg:#fafbfc; --surface:#ffffff; --surface-2:#f3f4f6; --border:#e5e7eb; --border-strong:#d1d5db;
+    --fg:#0f172a; --fg-2:#475569; --muted:#94a3b8;
+    --brand:#6d28d9; --brand-50:#f5f3ff; --brand-100:#ede9fe;
+    --good:#15803d; --good-bg:#dcfce7;
+    --warn:#b45309; --warn-bg:#fef3c7;
+    --bad:#b91c1c;  --bad-bg:#fee2e2;
+    --code-bg:#0f172a; --code-fg:#e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+    --shadow:    0 1px 3px rgba(15,23,42,.06), 0 4px 16px rgba(15,23,42,.04);
+    --radius:14px;
+  }}
+  * {{ box-sizing:border-box; }}
+  html, body {{ background:var(--bg); }}
+  body {{
+    font:14.5px/1.6 'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    color:var(--fg); margin:0; padding:0; -webkit-font-smoothing:antialiased;
+  }}
+  /* ── topbar (sticky) ─────────────────────────── */
+  .topbar {{
+    position:sticky; top:0; z-index:20; background:rgba(255,255,255,.85);
+    backdrop-filter:saturate(180%) blur(12px); -webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--border);
+  }}
+  .topbar-inner {{
+    max-width:1180px; margin:0 auto; padding:12px 24px;
+    display:flex; align-items:center; gap:16px;
+  }}
+  .logo {{
+    width:30px; height:30px; border-radius:8px;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+    display:grid; place-items:center; color:#fff; font-weight:700; font-size:14px;
+    box-shadow:var(--shadow-sm);
+  }}
+  .brand {{ font-weight:600; font-size:15px; letter-spacing:-.01em; }}
+  .brand small {{ color:var(--fg-2); font-weight:400; margin-left:6px; }}
+  .topbar-actions {{ margin-left:auto; display:flex; gap:8px; align-items:center; }}
+  .chip {{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 11px; border-radius:999px; font-size:12px; font-weight:500;
+    background:var(--surface-2); color:var(--fg-2); border:1px solid var(--border);
+  }}
+  .chip.good {{ background:var(--good-bg); color:var(--good); border-color:transparent; }}
+  .chip.warn {{ background:var(--warn-bg); color:var(--warn); border-color:transparent; }}
+  .chip.bad  {{ background:var(--bad-bg);  color:var(--bad);  border-color:transparent; }}
+  .chip .dot {{ width:6px; height:6px; border-radius:50%; background:currentColor; }}
+
+  /* ── layout ──────────────────────────────────── */
+  .shell {{ max-width:1180px; margin:0 auto; padding:32px 24px 80px; }}
+  .hero {{
+    background:linear-gradient(180deg,#fff 0%,#fafbfc 100%);
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:28px 28px 24px; box-shadow:var(--shadow);
+    margin-bottom:22px;
+  }}
+  .hero h1 {{
+    font-size:30px; line-height:1.2; letter-spacing:-.02em;
+    margin:0 0 8px; font-weight:700;
+  }}
+  .hero p.sub {{ color:var(--fg-2); margin:0 0 16px; max-width:780px; }}
+  .badges {{ display:flex; flex-wrap:wrap; gap:6px; }}
+
+  h2 {{ font-size:13px; text-transform:uppercase; letter-spacing:.08em;
+        color:var(--muted); font-weight:600; margin:36px 4px 12px; }}
+  h2 .num {{ color:var(--brand); margin-right:6px; }}
+
+  /* ── stat grid ──────────────────────────────── */
+  .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }}
+  .stat {{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px; box-shadow:var(--shadow-sm); transition:transform .15s, box-shadow .15s;
+  }}
+  .stat:hover {{ transform:translateY(-1px); box-shadow:var(--shadow); }}
+  .stat .label {{ font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; margin-bottom:8px; }}
+  .stat .val {{ font-size:30px; font-weight:700; color:var(--fg); letter-spacing:-.02em; }}
+  .stat .val small {{ font-size:13px; color:var(--fg-2); font-weight:500; margin-left:6px; letter-spacing:0; }}
+  .stat .help {{ color:var(--fg-2); font-size:13px; margin-top:8px; }}
+
+  /* ── content card (table + sections) ─────────── */
+  .card {{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:6px 6px; box-shadow:var(--shadow-sm); overflow:hidden;
+  }}
+  .card .card-head {{
+    padding:16px 22px 0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }}
+  .card .card-head h3 {{ margin:0; font-size:16px; font-weight:600; letter-spacing:-.01em; }}
+  .card .card-head .sub {{ color:var(--fg-2); font-size:13px; }}
+  .card .card-body {{ padding:14px 22px 22px; }}
+
+  /* tables: scrollable on mobile + sticky first column */
+  .table-wrap {{
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    border-radius:10px;
+  }}
+  table {{ border-collapse:separate; border-spacing:0; width:100%; font-size:14px; min-width:560px; }}
+  th, td {{ text-align:left; padding:12px 14px; vertical-align:top; background:var(--surface); }}
+  thead th {{
+    background:var(--surface-2); color:var(--fg-2);
+    font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.06em;
+    border-bottom:1px solid var(--border);
+  }}
+  tbody tr {{ border-top:1px solid var(--border); }}
+  tbody tr:first-child td {{ border-top:none; }}
+  tbody tr:hover td {{ background:var(--brand-50); }}
+  td code {{ background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:12.5px; }}
+  /* sticky first column on narrow viewports */
+  @media (max-width:780px) {{
+    th:first-child, td:first-child {{
+      position:sticky; left:0; z-index:1;
+      box-shadow:1px 0 0 var(--border);
+      min-width:140px; max-width:200px;
+    }}
+    thead th:first-child {{ background:var(--surface-2); }}
+    tbody td:first-child {{ background:var(--surface); font-weight:500; }}
+    tbody tr:hover td:first-child {{ background:var(--brand-50); }}
+  }}
+  .status {{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:600;
+    white-space:nowrap;
+  }}
+  .status.ok   {{ background:var(--good-bg); color:var(--good); }}
+  .status.gap  {{ background:var(--warn-bg); color:var(--warn); }}
+  .status.miss {{ background:var(--bad-bg); color:var(--bad); }}
+
+  /* ── code blocks ─────────────────────────────── */
+  pre {{
+    background:var(--code-bg); color:var(--code-fg);
+    border-radius:10px; padding:16px 18px; overflow:auto;
+    font:12.5px/1.55 'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    max-height:520px; margin:0;
+  }}
+  pre::-webkit-scrollbar {{ width:8px; height:8px; }}
+  pre::-webkit-scrollbar-thumb {{ background:#334155; border-radius:6px; }}
+  code {{ font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace; }}
+
+  /* ── footer ──────────────────────────────────── */
+  footer {{ color:var(--muted); font-size:12.5px; text-align:center; padding:36px 24px; }}
+  footer a {{ color:var(--fg-2); text-decoration:none; border-bottom:1px dotted var(--border-strong); }}
+
+  /* mobile */
+  @media (max-width:640px) {{
+    .hero {{ padding:22px; }}
+    .hero h1 {{ font-size:24px; }}
+    .shell {{ padding:20px 14px 60px; }}
+    th, td {{ padding:10px 10px; }}
+  }}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+    <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
+    <div class="topbar-actions">
+      <a class="chip" href="/" style="text-decoration:none">← Home</a>
+      <a class="chip" href="/whitepaper/" style="text-decoration:none">Whitepaper</a>
+      <a class="chip" href="/slides.html" style="text-decoration:none">Slides</a>
+      <span class="chip good"><span class="dot"></span>65 / 65 tests</span>
+    </div>
+  </div>
+</div>
+
+<main class="shell">
+
+  <section class="hero">
+    <h1>A Bittensor subnet for endangered Chinese languages.</h1>
+    <p class="sub">Hokkien / Min Nan v1, with the mechanism design (commit-reveal, native-speaker DAO, GLM-judged back-translation) shipped as real code — not a slide deck.</p>
+    <div class="badges">
+      <span class="chip good"><span class="dot"></span>57 Python tests pass</span>
+      <span class="chip good"><span class="dot"></span>8 Solidity tests pass</span>
+      <span class="chip good"><span class="dot"></span>Real bittensor SDK</span>
+      <span class="chip good"><span class="dot"></span>On-chain DAO (anvil)</span>
+      <span class="chip good"><span class="dot"></span>Real LLM judge (Claude / GLM-4.6)</span>
+      <span class="chip warn"><span class="dot"></span>Hokkien audio model is a stretch goal</span>
+    </div>
+  </section>
+
+  <h2><span class="num">0a</span>ELI5 — what is this and why does it matter</h2>
+  <div class="card"><div class="card-body" style="padding:20px 22px">
+    <p style="margin-top:0"><strong>The simple version.</strong> China is home to dozens of major Sinitic varieties (Hokkien ≈ 50 M speakers, Cantonese ≈ 80 M, Hakka, Wu/Shanghainese, Xiang…) plus 55 officially recognized minority nationalities speaking another 100-plus languages between them (Tibetan, Uyghur, Mongolian, Zhuang, Yi…). UNESCO's Atlas lists ~140 of these as endangered. Siri and Alexa don't understand any of them. They're slowly disappearing because <em>nobody pays AI companies to learn them</em>. The market by itself won't fix this.</p>
+    <p>UNESCO, the State Language Commission, Mozilla Common Voice, and the speech-AI teams at iFlytek / Baidu / Alibaba <em>already</em> spend real money trying to preserve and digitize these languages — but slowly, one researcher at a time, with no way to know if the data they paid for is actually good.</p>
+    <p>LanguageArk-CN is a Bittensor subnet that lets anyone in the world help — record yourself speaking Hokkien, fine-tune a tiny translation model, attest to someone else's fluency — and get paid in TAO when their work passes muster. The judges aren't us; they're a stake-bonded panel of native speakers who lose money if they lie. The combined score (native-speaker Elo + LLM back-translation + held-out FLORES corpus) is hard to fake because <em>three independent signals would all have to be wrong at once</em>.</p>
+    <p style="margin-bottom:0"><strong>Think of it as Mechanical Turk + Wikipedia + stake-to-vote</strong>, purpose-built for the languages that would otherwise disappear before the next foundation model gets trained.</p>
+  </div></div>
+
+  <h2><span class="num">0b</span>Sharpening the framing (a soft pivot, not a rewrite)</h2>
+  <div class="card"><div class="card-body" style="padding:20px 22px">
+    <p style="margin-top:0"><strong>Old framing:</strong> "A Bittensor subnet to preserve endangered Chinese languages."</p>
+    <p style="margin-bottom:14px"><strong>New framing:</strong> <em>"A verifiable Chinese-language data marketplace — with Hokkien as the v1 wedge."</em></p>
+    <p style="color:var(--fg-2)">Why the reframe: judges and grant-makers respond to <strong>market size + a credible wedge</strong>. "Endangered languages" reads as charity. "Chinese-language data marketplace" reads as infrastructure — same code, broader TAM, easier-to-evaluate buyer roster. Hokkien stays as the v1 launch language because it's the hardest case (Meta itself chose it as their canonical low-resource S2ST research target), which makes it the strongest proof-of-mechanism. If the protocol can verify Hokkien data, it can verify Cantonese, Mandarin, Wu, Hakka, Tibetan, Uyghur, English-as-a-second-language… anything where native-speaker judgment matters.</p>
+    <p style="color:var(--fg-2);margin-bottom:0">No code changes required for this pivot — only the pitch. The Solidity DAO, the FLORES eval, the GLM/Claude judge, the Glicko-2 implementation all generalize to any language pair with a stake-bonded speaker community. The new framing also opens up a stronger "Phase 2" expansion path: once Hokkien is shipped, the same protocol scales to <em>every</em> Chinese-language pair (an order-of-magnitude larger TAM than endangered-only), then to <em>every</em> language pair globally.</p>
+  </div></div>
+
+  <h2><span class="num">0</span>Business case — why this gets bought</h2>
+  <div class="card"><div class="card-body" style="padding:20px 22px">
+    <p style="margin-top:0"><strong>Thesis.</strong> Endangered-language data is currently funded by grants and policy (UNESCO, 国家语委) and harvested by hand. The cost is high, the throughput is low, the quality is unverified. We turn that funding into a market: miners supply ASR/TTS/MT model outputs, validators verify them with three independent signals, and buyers pay TAO for vetted corpora — without trusting any single contributor.</p>
+
+    <h3 style="margin:18px 0 6px;font-size:15px">Why this is venture-scale, not a side project</h3>
+    <ul style="margin:6px 0 18px;padding-left:20px;color:var(--fg-2)">
+      <li><strong>Recurring buyers.</strong> Mozilla Common Voice, the State Language Commission's 5-year plan line item for 数字化方言, UNESCO endangered-language grants, and the Chinese-language-AI teams at iFlytek / Baidu / Alibaba all already pay for this data — just inefficiently and to different vendors.</li>
+      <li><strong>Diaspora willingness-to-pay.</strong> 50 M Hokkien speakers globally (Fujian, Taiwan, SG, MY, PH, ID). Heritage-language apps (HiNative, Drops, Tandem) want conversation models. Direct revenue, not grants.</li>
+      <li><strong>Policy tailwind.</strong> "数字化方言" appears explicitly in the 14th Five-Year Plan. There is a budget owner.</li>
+    </ul>
+
+    <h3 style="margin:18px 0 6px;font-size:15px">Unit economics — back-of-the-envelope</h3>
+    <div class="table-wrap" style="margin:6px 0 0">
+    <table style="font-size:14px">
+      <thead><tr><th>Lever</th><th>Conservative</th><th>Reasoning</th></tr></thead>
+      <tbody>
+        <tr><td class="who">Mozilla Common Voice</td><td>Volunteer-driven (no per-clip payouts)</td><td>Common Voice contributors are unpaid. <em>Adjacent</em> programs (Mozilla Foundation grants, MLCommons People's Speech) do fund corpus collection. Numbers vary; cite when pitching.</td></tr>
+        <tr><td class="who">国家语委 dialect digitization</td><td>Multi-million-RMB / multi-year line items in 14th & 15th Five-Year Plans</td><td>Exact figures are buried in provincial budgets — directionally large but should be sourced before any sales call.</td></tr>
+        <tr><td class="who">Commercial speech-data vendors</td><td>Reference: Beike / Magic Data / Speechocean charge $0.30–$2 per validated audio minute for Chinese</td><td>This is the price band our subnet's incentives need to clear. Public price sheets from Magic Data and similar vendors; Hokkien is typically a "rare language" surcharge tier.</td></tr>
+        <tr><td class="who">Subnet TAO emissions</td><td>Set by Bittensor's emission curve — share depends on root-network weight</td><td>Pre-revenue bootstrap. We deliberately don't quote a $/day until a netuid is registered and root weight is observed — would be a fabricated number.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 style="margin:22px 0 6px;font-size:15px">Why a Bittensor subnet (not a startup)</h3>
+    <ol style="margin:6px 0 18px;padding-left:20px;color:var(--fg-2)">
+      <li><strong>Subsidy comes free with the protocol.</strong> Daily TAO emissions fund miner work before paying buyers show up. A grant-only startup has no equivalent runway.</li>
+      <li><strong>Anti-Sybil is built in.</strong> Native-speaker registration on a normal SaaS is brittle (KYC, fake passports). On a subnet, it's a 2-of-3 attested stake — verifiable, slashable, public.</li>
+      <li><strong>Trustless QA.</strong> Buyers don't need to trust us. They read the validator weights on-chain and audit the corpus. That's the value the protocol layer adds.</li>
+      <li><strong>Composability.</strong> A downstream subnet can use our verified Hokkien corpus as its training set. The data is liquid, not locked in our DB.</li>
+    </ol>
+
+    <h3 style="margin:22px 0 6px;font-size:15px">Honest counter-arguments</h3>
+    <ul style="margin:6px 0 0;padding-left:20px;color:var(--fg-2)">
+      <li><strong>Buyer integration is hard.</strong> UNESCO doesn't buy TAO. Need an off-ramp: a non-profit foundation that converts buyer fiat → TAO and back, or a sponsored translator layer.</li>
+      <li><strong>Cold-start speaker problem.</strong> Need ~30 stake-bonded native speakers per language to bootstrap pairwise Elo. The plan is to start with Hokkien diaspora orgs in <code>partners.md</code> — university clubs, religious orgs, language schools.</li>
+      <li><strong>v1 is a market of one.</strong> Hokkien only at launch. Adding Hakka, Wu, Tibetan takes another 1–2 quarters each — but the mechanism is the same code with a different lang tag.</li>
+    </ul>
+
+    <h3 style="margin:22px 0 6px;font-size:15px">Are we overengineering?</h3>
+    <p style="margin:6px 0 0;color:var(--fg-2)">For an <em>ideathon</em>, partially yes — judges grade mechanism, not infrastructure. The Solidity Speaker DAO contract is overkill for a 90-second judging slot; a slide diagram would score the same. We built it anyway because it's also what we'd need on day 1 of a grant-funded build, and because "deployed and exercised on-chain" is harder to dismiss than "designed on paper." We've explicitly skipped the work that doesn't move the score: real subtensor docker, real Whisper-Hokkien weights, mainnet btcli registration. Those belong to the post-grant phase.</p>
+  </div></div>
+
+  <h2><span class="num">1</span>By the numbers</h2>
+  <div class="grid">
+    <div class="stat">
+      <div class="label">Tests</div>
+      <div class="val">65<small>/ 65 passing</small></div>
+      <div class="help">57 Python (pytest) + 8 Solidity (forge). 1 skip is an opt-in 9 GB SeamlessM4T download.</div>
+    </div>
+    <div class="stat">
+      <div class="label">FLORES-200 pairs</div>
+      <div class="val">997</div>
+      <div class="help">yue_Hant ↔ zho_Hans, professional translators. Real Meta dataset.</div>
+    </div>
+    <div class="stat">
+      <div class="label">Commit-reveal defense</div>
+      <div class="val">100%<small>→ 42% attacker vTrust</small></div>
+      <div class="help">Attack simulator: vTrust drops 1.00 → 0.42 once commit-reveal is on. Reproducible.</div>
+    </div>
+    <div class="stat">
+      <div class="label">Attestation gate</div>
+      <div class="val">2 / 3</div>
+      <div class="help">Speaker DAO contract: stake + 2-of-3 attestation + slash, all on-chain.</div>
+    </div>
+  </div>
+
+  <h2><span class="num">2</span>Real vs toy — current state</h2>
+  <div class="card"><div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>What runs for real</th><th style="text-align:right">Status</th></tr></thead>
+      <tbody>
+        <tr><td>bittensor SDK</td><td><code>HokkienASR / HokkienMT / HokkienTTS</code> are real <code>bt.Synapse</code> subclasses (v10.3.2). <code>languageark.chain probe</code> reads live finney metagraph state.</td><td style="text-align:right"><span class="status ok">Real</span></td></tr>
+        <tr><td>Eval corpus</td><td>FLORES-200 yue_Hant / zho_Hans (997 pro-translated pairs). chrF++ via <code>sacrebleu</code>.</td><td style="text-align:right"><span class="status ok">Real</span></td></tr>
+        <tr><td>Speaker rating</td><td>Glicko-2 with full Illinois-algorithm volatility update. 6 tests cover monotonicity, draws, decay.</td><td style="text-align:right"><span class="status ok">Real</span></td></tr>
+        <tr><td>Yuma attack model</td><td>Power-law miner weights, drift-aware vTrust, commit-reveal defense.</td><td style="text-align:right"><span class="status ok">Real</span></td></tr>
+        <tr><td>LLM judge</td><td>Real <code>GLMClient</code> (Zhipu) + real <code>AnthropicJudge</code> (Claude). Mock only if neither key is set.</td><td style="text-align:right"><span class="status ok">New</span></td></tr>
+        <tr><td>Speaker DAO</td><td>Solidity contract: stake + 2-of-3 attest + slash + on-chain Glicko rating writeback. Deployed and exercised on anvil.</td><td style="text-align:right"><span class="status ok">New</span></td></tr>
+        <tr><td>Commit-reveal hash</td><td>Validator prints SHA-256 commitment; doesn't yet call <code>subtensor.commit_weights()</code> against a live chain.</td><td style="text-align:right"><span class="status gap">Partial</span></td></tr>
+        <tr><td>Hokkien ASR/MT model</td><td>SeamlessM4T-v2 tokenizer probe shows Meta's flagship lacks <code>__nan__</code>. FLORES-200 ships <code>nan_Latn</code> (Latin/POJ romanization) — but real Hokkien text is written in Han characters, which neither dataset covers well. That gap IS the product.</td><td style="text-align:right"><span class="status gap">Honest gap</span></td></tr>
+        <tr><td>Mainnet registration</td><td><code>subnet_register.py</code> emits the exact <code>btcli</code> sheet but doesn't execute (~3 000 TAO burn).</td><td style="text-align:right"><span class="status miss">Deferred</span></td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <h2><span class="num">3</span>Proof — demo.sh end-to-end run</h2>
+  <div class="card"><div class="card-head"><h3>bash demo.sh</h3><span class="sub">Runs in &lt;5 s, no API key required · with <code>ANTHROPIC_API_KEY</code> set, steps ❹/❺ use real Claude</span></div><div class="card-body"><pre>{demo}</pre></div></div>
+
+  <h2><span class="num">4</span>Proof — Speaker DAO deployed on a real EVM chain</h2>
+  <div class="card"><div class="card-head"><h3>python scripts/deploy_speaker_dao_local.py</h3><span class="sub">Solidity contract <code>contracts/src/SpeakerDAO.sol</code> · each step is a real on-chain tx</span></div><div class="card-body"><pre>{dao}</pre></div></div>
+
+  <h2><span class="num">4b</span>Proof — Validator reads miner Elo from the on-chain DAO</h2>
+  <div class="card"><div class="card-head"><h3>python scripts/validator_e2e_onchain.py</h3><span class="sub">Deploy contract → seed Glicko ratings on-chain → run validator with <code>--dao-backend=onchain</code>. The "Elo" column in the score table is read from the contract via <code>getRating()</code>, not from a JSON file.</span></div><div class="card-body"><pre>{onchain}</pre></div></div>
+
+  <h2><span class="num">5</span>Proof — 8 Solidity tests pass</h2>
+  <div class="card"><div class="card-head"><h3>forge test --root contracts</h3></div><div class="card-body"><pre>{forge}</pre></div></div>
+
+  <h2><span class="num">6</span>Proof — 57 Python tests pass</h2>
+  <div class="card"><div class="card-head"><h3>pytest -v</h3></div><div class="card-body"><pre>{pytest_out}</pre></div></div>
+
+  <h2><span class="num">6b</span>Fact-check log</h2>
+  <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
+    <p style="margin-top:0">Pass on {ts}. Corrections vs the previous /notes build:</p>
+    <ul style="margin:8px 0 0;padding-left:22px">
+      <li>Test counts: <strong>57 pytest + 8 forge = 65</strong> (was 55+8 = 63 before two Claude-miner tests landed).</li>
+      <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
+      <li>Mozilla Common Voice "$/clip" estimates: <strong>removed</strong> — fabricated. Contributors are unpaid volunteers; only adjacent grant programs ever pay, and at variable amounts.</li>
+      <li>RMB province-budget figures: hedged to "multi-million-RMB / multi-year line items" — directional, not precise.</li>
+      <li>"$60–$300 / day TAO emissions": <strong>removed</strong> — we don't have a registered netuid yet, so any specific $/day figure would be guessed.</li>
+      <li>"130+ kinds of Chinese": tightened to "dozens of Sinitic varieties + 55 minority nationalities speaking 100+ languages; ~140 endangered per UNESCO."</li>
+      <li>"128 Bittensor subnets": replaced with "100+ registered subnets, none currently address this" — subnet count grows; specific figures rot fast.</li>
+    </ul>
+    <p style="margin:14px 0 0">What we deliberately did <em>not</em> change: the <strong>100% → 42% commit-reveal vTrust knockout</strong> (reproducible by running <code>python -m languageark.attack</code>), the <strong>50 M Hokkien-speaker</strong> figure (Wikipedia / Ethnologue consensus), the <strong>Meta SeamlessM4T-v2 lacks <code>__nan__</code></strong> finding (verified empirically against the HF tokenizer), and the <strong>997 FLORES-200 pairs</strong> count (literal <code>wc -l</code> on our local copy).</p>
+  </div></div>
+
+  <h2><span class="num">7</span>Honesty page (unedited)</h2>
+  <div class="card"><div class="card-head"><h3>HONESTY.md</h3><span class="sub">Items now closed: real on-chain Speaker DAO · real LLM back-translation judge</span></div><div class="card-body"><pre>{honesty}</pre></div></div>
+
+</main>
+
+<footer>
+  Generated {ts} · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
+</footer>
+</body>
+</html>
+"""
+
+import datetime as _dt
+
+out = TEMPLATE.format(
+    demo=html.escape(demo),
+    dao=html.escape(dao),
+    onchain=html.escape(onchain),
+    forge=html.escape(forge),
+    pytest_out=html.escape(pytest_out),
+    honesty=html.escape(honesty),
+    ts=_dt.datetime.now(_dt.UTC).strftime("%Y-%m-%d %H:%M UTC"),
+)
+
+(NOTES / "index.html").write_text(out)
+print(f"wrote {NOTES / 'index.html'} ({len(out):,} bytes)  ← internal /notes")
+
+
+# ─── product page: clean, user-facing ─────────────────────────────────────
+PRODUCT = r"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LanguageArk-CN — verifiable Chinese-language data marketplace</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f8fb; --surface:#fff; --surface-2:#f3f4f6; --border:#e5e7eb; --border-strong:#d1d5db;
+    --fg:#0f172a; --fg-2:#475569; --muted:#94a3b8;
+    --brand:#6d28d9; --brand-2:#06b6d4; --brand-50:#f5f3ff;
+    --good:#15803d; --good-bg:#dcfce7; --warn:#b45309; --warn-bg:#fef3c7; --bad:#b91c1c; --bad-bg:#fee2e2;
+    --code-bg:#0f172a; --code-fg:#e2e8f0;
+    --radius:14px;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.05);
+    --shadow:0 2px 6px rgba(15,23,42,.05),0 12px 28px rgba(15,23,42,.06);
+    --sidebar-w:240px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg)}
+  body{font:14.5px/1.55 'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased}
+  a{color:var(--brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;font-size:12.5px}
+
+  /* ── app shell ── */
+  .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+  /* sidebar */
+  aside{
+    background:linear-gradient(180deg,#fff 0%,#fbfbfd 100%);
+    border-right:1px solid var(--border);
+    padding:18px 14px;
+    position:sticky;top:0;align-self:start;
+    height:100vh;overflow-y:auto;
+  }
+  .brand-row{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;border-bottom:1px solid var(--border);margin-bottom:10px}
+  .logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;box-shadow:var(--shadow-sm)}
+  .brand{font-weight:600;font-size:14.5px;letter-spacing:-.01em}
+  .brand small{display:block;color:var(--fg-2);font-weight:400;font-size:12px;margin-top:1px}
+  nav.side{display:flex;flex-direction:column;gap:2px;padding:6px 2px}
+  nav.side a{
+    display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+    color:var(--fg-2);font-size:13.5px;font-weight:500;
+  }
+  nav.side a:hover{background:var(--surface-2);color:var(--fg);text-decoration:none}
+  nav.side a.active{background:var(--brand-50);color:var(--brand);font-weight:600}
+  nav.side a .ico{width:18px;height:18px;display:grid;place-items:center;font-size:13px}
+  nav.side .sec-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 12px 6px}
+  .live-card{margin:14px 8px 0;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12.5px}
+  .live-card .row{display:flex;justify-content:space-between;align-items:center}
+  .live-card .lbl{color:var(--fg-2)}
+  .live-card .pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(21,128,61,.4);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(21,128,61,.5)}70%{box-shadow:0 0 0 8px rgba(21,128,61,0)}100%{box-shadow:0 0 0 0 rgba(21,128,61,0)}}
+
+  /* main */
+  main{padding:0}
+  .topbar{
+    position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+    backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:12px;padding:10px 24px;
+  }
+  .crumb{color:var(--fg-2);font-size:13.5px}
+  .crumb b{color:var(--fg)}
+  .topbar .spacer{flex:1}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--fg-2);font-size:12px;font-weight:500;border:1px solid var(--border)}
+  .chip.good{background:var(--good-bg);color:var(--good);border-color:transparent}
+  .chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  .content{padding:24px 28px 72px;max-width:1080px}
+
+  /* route panels */
+  .route{display:none;animation:fade .25s ease}
+  .route.is-active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
+
+  .hero h1{font-size:32px;line-height:1.15;letter-spacing:-.02em;margin:8px 0 8px;font-weight:700}
+  .hero .lede{color:var(--fg-2);font-size:16px;max-width:720px;margin:0 0 18px}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;background:var(--brand-50);color:var(--brand);font-size:12px;font-weight:600;letter-spacing:.02em;margin-bottom:14px}
+
+  h2.section{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:32px 0 12px}
+  /* grid + cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm)}
+  .card.hi{box-shadow:var(--shadow)}
+  .card h3{font-size:15.5px;margin:0 0 6px;letter-spacing:-.01em;font-weight:600}
+  .card p{margin:0;color:var(--fg-2);font-size:13.5px;line-height:1.55}
+  .card .ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#ede9fe,#cffafe);display:grid;place-items:center;font-size:16px;margin-bottom:10px}
+
+  /* stat tile */
+  .stat .label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .stat .val{font-size:28px;font-weight:700;color:var(--fg);letter-spacing:-.02em}
+  .stat .val small{font-size:12px;color:var(--fg-2);font-weight:500;margin-left:4px}
+
+  /* widget */
+  .widget{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .widget h3{margin:0 0 4px;font-size:16px;font-weight:600;letter-spacing:-.01em}
+  .widget .help{color:var(--fg-2);font-size:13px;margin:0 0 14px}
+  .ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .ctl label{font-size:13px;color:var(--fg-2);font-weight:500;min-width:170px}
+  .ctl input[type=range]{flex:1;accent-color:var(--brand);min-width:120px}
+  .ctl input[type=number]{width:64px;padding:4px 8px;border:1px solid var(--border-strong);border-radius:6px;font-family:'JetBrains Mono',monospace}
+  .ctl input[type=text],textarea{width:100%;border:1px solid var(--border-strong);border-radius:8px;padding:9px 11px;font:14px/1.55 'Inter',sans-serif;color:var(--fg);background:var(--surface)}
+  textarea{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:13.5px;resize:vertical;min-height:64px}
+  .ctl .val-readout{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--brand);font-weight:600;min-width:48px;text-align:right}
+  .ctl-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  @media (max-width:680px){.ctl-row{grid-template-columns:1fr}}
+
+  .bar-chart{display:grid;grid-template-columns:140px 1fr 70px;gap:10px;align-items:center;margin:6px 0}
+  .bar-chart .lbl{font-size:13px;color:var(--fg-2)}
+  .bar-chart .track{height:18px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+  .bar-chart .fill{height:100%;border-radius:6px;transition:width .35s ease, background .35s ease}
+  .bar-chart .num{font-family:'JetBrains Mono',monospace;font-size:13px;text-align:right;color:var(--fg)}
+
+  .out-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:8px}
+  .out{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+  .out .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .out .num{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:18px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
+  .badge.go{background:var(--good-bg);color:var(--good)}
+  .badge.warn{background:var(--warn-bg);color:var(--warn)}
+
+  /* tables (buyer/inspirations) */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid var(--border);background:var(--surface)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;min-width:560px}
+  th,td{text-align:left;padding:11px 14px;vertical-align:top;background:var(--surface)}
+  thead th{background:var(--surface-2);color:var(--fg-2);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;border-bottom:1px solid var(--border)}
+  tbody tr{border-top:1px solid var(--border)}
+  tbody tr:first-child td{border-top:none}
+  tbody tr:hover td{background:var(--brand-50)}
+  .who{font-weight:600;color:var(--fg);min-width:180px}
+  @media (max-width:780px){
+    th:first-child,td:first-child{position:sticky;left:0;z-index:1;box-shadow:1px 0 0 var(--border);min-width:150px;max-width:200px;background:var(--surface)}
+    thead th:first-child{background:var(--surface-2)}
+  }
+
+  /* mobile: collapse sidebar into a top drawer */
+  .menu-btn{display:none;border:1px solid var(--border);background:var(--surface);width:32px;height:32px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer}
+  @media (max-width:880px){
+    .app{grid-template-columns:1fr}
+    aside{position:fixed;top:0;left:0;right:0;height:auto;min-height:0;max-height:100vh;border-right:none;border-bottom:1px solid var(--border);transform:translateY(-100%);transition:transform .25s ease;z-index:30;width:100%;padding:14px 14px 18px}
+    aside.open{transform:none}
+    .menu-btn{display:inline-flex}
+    nav.side{flex-direction:column}
+    .content{padding:20px 18px 60px}
+    .hero h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside id="sidebar">
+    <div class="brand-row">
+      <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+      <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
+    </div>
+    <nav class="side" id="sidenav">
+      <a href="#/home"     data-route="home"     class="active"><span class="ico">●</span> Overview</a>
+      <a href="#/rubric"   data-route="rubric"><span class="ico">▥</span> Ideathon rubric</a>
+      <a href="#/mechanism" data-route="mechanism"><span class="ico">◆</span> Mechanism</a>
+      <a href="#/attack"   data-route="attack"><span class="ico">⚔</span> Attack simulator</a>
+      <a href="#/scorer"   data-route="scorer"><span class="ico">𝐀</span> Score a translation</a>
+      <a href="#/buyers"   data-route="buyers"><span class="ico">$</span> Buyers</a>
+      <a href="#/lineage"  data-route="lineage"><span class="ico">⌥</span> Subnet lineage</a>
+      <div class="sec-label">Reference</div>
+      <a href="/whitepaper/"><span class="ico">📄</span> Whitepaper</a>
+      <a href="/slides.html"><span class="ico">▶</span> Slides</a>
+      <a href="/partners/"><span class="ico">⌶</span> Partners</a>
+      <a href="/notes/"><span class="ico">⌘</span> Engineering notes</a>
+    </nav>
+    <div class="live-card">
+      <div class="row"><span class="lbl">Status</span><span><span class="pulse"></span> Live</span></div>
+      <div class="row" style="margin-top:4px"><span class="lbl">Tests</span><span><b>65 / 65</b></span></div>
+      <div class="row" style="margin-top:4px"><span class="lbl">Build</span><span id="build-ts" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--fg-2)"></span></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-label="menu">☰</button>
+      <div class="crumb">LanguageArk-CN / <b id="crumb-here">Overview</b></div>
+      <div class="spacer"></div>
+      <span class="chip good"><span class="dot"></span>Proof of Intelligence · Shanghai · May 23</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ── HOME ── -->
+      <section class="route is-active" id="route-home">
+        <div class="hero">
+          <span class="pill">A verifiable Chinese-language data marketplace</span>
+          <h1>Endangered-language preservation, as a self-policing market.</h1>
+          <p class="lede">Miners ship ASR / TTS / MT models for Hokkien (v1 wedge), Cantonese, Tibetan, Uyghur, Wu… Validators score them with a 3-signal composite (native-speaker Elo + LLM back-translation + held-out FLORES-200) that survives weight-copying, Sybil speakers, and validator cabals. Buyers (Mozilla, 国家语委, UNESCO, iFlytek) read the on-chain weights and pay for vetted corpora.</p>
+        </div>
+
+        <h2 class="section">Status — by the numbers</h2>
+        <div class="grid">
+          <div class="card stat"><div class="label">Tests</div><div class="val">65<small>/ 65 passing</small></div></div>
+          <div class="card stat"><div class="label">FLORES-200 pairs</div><div class="val">997<small>yue↔zh</small></div></div>
+          <div class="card stat"><div class="label">Commit-reveal knockout</div><div class="val">100→42%<small>vTrust</small></div></div>
+          <div class="card stat"><div class="label">DAO gate</div><div class="val">2 / 3<small>on-chain</small></div></div>
+        </div>
+
+        <h2 class="section">What's real</h2>
+        <div class="grid">
+          <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
+          <div class="card"><div class="ico">🧪</div><h3>Live LLM judge</h3><p>Validator calls Zhipu GLM-4.6 when <code>ZHIPU_API_KEY</code> is set; Claude Haiku 4.5 otherwise; heuristic mock as last resort.</p></div>
+          <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
+        </div>
+      </section>
+
+      <!-- ── RUBRIC ── -->
+      <section class="route" id="route-rubric">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Ideathon rubric mapping</h1>
+        <p class="lede" style="font-size:15px">Proof of Intelligence (Shanghai · May 23) grades four dimensions of <strong>机制设计能力</strong> (mechanism design capability). Each row below maps one rubric axis to the concrete artifact in this app that demonstrates it.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Axis</th><th>What judges ask</th><th>Where we answer it</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="who">产品力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Product</span></td>
+                <td>What digital intelligence commodity do you sell, to whom, at what price?</td>
+                <td>Vetted multi-language ASR / TTS / MT corpora + scored models. Buyers in <a href="#/buyers">Buyers</a>. Unit economics + business case in <a href="/notes/#0">/notes §0</a>.</td>
+              </tr>
+              <tr>
+                <td class="who">组织力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Organization</span></td>
+                <td>Why will global contributors do work for you and not somewhere else?</td>
+                <td>Stake-bonded native-speaker DAO (real Solidity), 2-of-3 attestation, slashable. Diaspora-org outreach in <a href="/partners/">Partners</a>. TAO emissions bootstrap supply before buyer revenue ramps.</td>
+              </tr>
+              <tr>
+                <td class="who">验证力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Verification</span></td>
+                <td>How is contributor output automatically audited via code, not opinion?</td>
+                <td>3-signal composite: Glicko-2 Elo + GLM-4.6 back-translation + held-out FLORES-200 chrF++. Try the live <a href="#/scorer">scorer widget</a>. Code: <code>scoring.py</code>, <code>metrics.py</code>; 65 tests pass.</td>
+              </tr>
+              <tr>
+                <td class="who">博弈力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Game theory</span></td>
+                <td>What stops weight-copying, Sybil speakers, validator cabals, model theft?</td>
+                <td>Six-attack / six-defense map in <a href="#/mechanism">Mechanism</a>. Reproducible knockout in the <a href="#/attack">attack simulator</a> (drag the commit-reveal slider, watch the freeloader bar drop).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="section">90-second demo script (中文)</h2>
+        <div class="widget">
+          <p class="help" style="margin-bottom:14px"><strong>Suggested judging-floor flow.</strong> Pulls from this app + <code>demo.sh</code>; survives an offline laptop via the <a href="/notes/">/notes</a> recorded screenshots.</p>
+          <ol style="padding-left:22px;color:var(--fg-2);margin:0;line-height:1.85;font-size:14px">
+            <li><strong>10s — 问题</strong>: "中国 130+ 种濒危方言, 零条 Bittensor 子网解决这个问题."</li>
+            <li><strong>15s — 产品力</strong>: open <a href="#/buyers">Buyers</a>. "Mozilla, 国家语委, UNESCO 都已经在花钱, 但慢而无法验证."</li>
+            <li><strong>15s — 组织力</strong>: open <a href="#/mechanism">Mechanism</a>, point at the DAO card. "母语者 stake 100 TAO + 2-of-3 attestation, Solidity 合约, 已部署."</li>
+            <li><strong>15s — 验证力</strong>: open <a href="#/scorer">Score a translation</a>. Click the three quality tiers — show chrF++ drop from 1.00 → 0.45 → 0.10.</li>
+            <li><strong>25s — 博弈力</strong>: open <a href="#/attack">Attack simulator</a>. Drag commit-reveal slider 0 → 5. "Freeloader 红条从 1.00 掉到 0.42 — 同一行代码差 58 分."</li>
+            <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 5 秒跑完, 65/65 测试通过, 已部署. 谢谢."</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ── MECHANISM ── -->
+      <section class="route" id="route-mechanism">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Mechanism</h1>
+        <p class="lede" style="font-size:15px">A 3-signal composite. Every signal is independent — collusion would have to corrupt all three at once.</p>
+
+        <div class="widget">
+          <h3>score(miner)</h3>
+          <p class="help">Weights are illustrative; the validator's actual coefficients live in <code>scoring.py</code>.</p>
+          <pre style="background:var(--code-bg);color:var(--code-fg);padding:16px;border-radius:10px;margin:0;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;overflow:auto">score = <span style="color:#67e8f9">0.4</span>·<span style="color:#a78bfa">Elo</span>      <span style="color:#64748b">// native-speaker DAO, Glicko-2</span>
+      + <span style="color:#67e8f9">0.3</span>·<span style="color:#a78bfa">BLEU_bt</span>  <span style="color:#64748b">// back-translation via GLM-4.6 / Claude</span>
+      + <span style="color:#67e8f9">0.3</span>·<span style="color:#a78bfa">FLORES</span>   <span style="color:#64748b">// rotated held-out professional corpus</span></pre>
+        </div>
+
+        <h2 class="section">Anti-gaming primitives</h2>
+        <div class="grid">
+          <div class="card"><div class="ico">🪪</div><h3>2-of-3 DAO attestation</h3><p>Speakers stake 100 TAO + need 2 attestations to register. Solidity contract, on-chain, slashable.</p></div>
+          <div class="card"><div class="ico">🔐</div><h3>Commit-reveal weights</h3><p><code>commit_reveal_period = 5</code> tempos. See the <a href="#/attack">Attack simulator →</a></p></div>
+          <div class="card"><div class="ico">⚖</div><h3>κ-clipping</h3><p><code>kappa = 0.6</code>. Cabal needs &gt;60% stake to move consensus.</p></div>
+          <div class="card"><div class="ico">🧬</div><h3>Min weight spread</h3><p><code>min_allowed_weights = 16</code> kills single-miner cabal payouts.</p></div>
+          <div class="card"><div class="ico">⚓</div><h3>Tight liquid-α</h3><p><code>α∈[0.05,0.35]</code> prevents bond whipsaw.</p></div>
+          <div class="card"><div class="ico">🧾</div><h3>Proof-of-training</h3><p>Miners commit <code>(loss_curve_hash, dataset_hash)</code> before serving. Detects model copying.</p></div>
+        </div>
+      </section>
+
+      <!-- ── ATTACK SIMULATOR ── -->
+      <section class="route" id="route-attack">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Attack simulator</h1>
+        <p class="lede" style="font-size:15px">A freeloader-validator publishes copies of honest weights instead of scoring miners. Sliding the commit-reveal period changes how stale its copies get — and how much vTrust it earns for zero work. Drag the slider, watch the dividend bar.</p>
+
+        <div class="widget">
+          <div class="ctl">
+            <label for="cr">commit-reveal period (tempos)</label>
+            <input type="range" id="cr" min="0" max="10" step="1" value="5">
+            <span class="val-readout" id="cr-out">5</span>
+          </div>
+          <div class="ctl">
+            <label for="drift">honest weight drift / tempo</label>
+            <input type="range" id="drift" min="0" max="100" step="1" value="35">
+            <span class="val-readout" id="drift-out">0.35</span>
+          </div>
+
+          <div style="margin-top:18px">
+            <div class="bar-chart">
+              <span class="lbl">Honest validator</span>
+              <div class="track"><div class="fill" id="bar-honest" style="background:#15803d;width:100%"></div></div>
+              <span class="num" id="num-honest">1.00</span>
+            </div>
+            <div class="bar-chart">
+              <span class="lbl">Freeloader (copying)</span>
+              <div class="track"><div class="fill" id="bar-free" style="background:#dc2626;width:100%"></div></div>
+              <span class="num" id="num-free">1.00</span>
+            </div>
+          </div>
+
+          <div class="out-grid" style="margin-top:18px">
+            <div class="out"><div class="lbl">Attack still works?</div><div class="num" id="attack-verdict">—</div></div>
+            <div class="out"><div class="lbl">Knockout</div><div class="num" id="attack-knockout">—</div></div>
+            <div class="out"><div class="lbl">Recommendation</div><div class="num" id="attack-recco" style="font-size:13px;font-weight:600">—</div></div>
+          </div>
+          <p class="help" style="margin-top:14px">Math: freeloader's stale copy is correct on the first reveal-tempo, then drifts at <code>drift × Δtempo</code>. vTrust = 1 − stale_distance, averaged over a 12-tempo window. Source: <code>languageark/attack.py</code> (Python equivalent).</p>
+        </div>
+      </section>
+
+      <!-- ── SCORER ── -->
+      <section class="route" id="route-scorer">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Score a translation</h1>
+        <p class="lede" style="font-size:15px">Paste a prediction and the gold reference. We compute <strong>chrF++</strong> client-side (character n-gram F-score, the modern MT eval metric used by WMT). This is the same signal the validator uses for the FLORES column.</p>
+
+        <div class="widget">
+          <div class="ctl-row">
+            <div>
+              <label style="font-size:12.5px;color:var(--fg-2);font-weight:600;display:block;margin-bottom:6px">Miner prediction</label>
+              <textarea id="pred" placeholder="你吃饱了吗">你吃饱了吗?</textarea>
+            </div>
+            <div>
+              <label style="font-size:12.5px;color:var(--fg-2);font-weight:600;display:block;margin-bottom:6px">Gold reference</label>
+              <textarea id="gold" placeholder="你吃饱了吗?">你吃饱了吗?</textarea>
+            </div>
+          </div>
+
+          <div class="out-grid">
+            <div class="out"><div class="lbl">chrF++ (β=2)</div><div class="num" id="chrf">—</div></div>
+            <div class="out"><div class="lbl">Char overlap</div><div class="num" id="overlap">—</div></div>
+            <div class="out"><div class="lbl">Length ratio</div><div class="num" id="lratio">—</div></div>
+            <div class="out"><div class="lbl">Composite (illustrative)</div><div class="num" id="composite">—</div></div>
+          </div>
+          <p class="help" style="margin-top:14px">"Composite" assumes a moderately rated miner (Elo = 1500) and a perfect back-translation, then weights this chrF++ at 0.3 per the score formula. Try the curated Hokkien pairs from <code>data/eval_samples.py</code> to see how each tier scores.</p>
+        </div>
+
+        <h2 class="section">Quick samples</h2>
+        <div class="grid">
+          <div class="card" style="cursor:pointer" data-pred="你吃饱了吗?" data-gold="你吃饱了吗?"><h3>Perfect (professional)</h3><p>Hokkien <code>你食飽未?</code> ↔ Mandarin <code>你吃饱了吗?</code>. Should score 1.00.</p></div>
+          <div class="card" style="cursor:pointer" data-pred="你吃了吗" data-gold="你吃饱了吗?"><h3>Light degradation (~15% char drop)</h3><p>Missing characters but recoverable. Should score ~0.4–0.5.</p></div>
+          <div class="card" style="cursor:pointer" data-pred="吃饱" data-gold="你吃饱了吗?"><h3>Heavy degradation (~50% char drop)</h3><p>Substring only. Should score below 0.2.</p></div>
+        </div>
+      </section>
+
+      <!-- ── BUYERS ── -->
+      <section class="route" id="route-buyers">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Buyers</h1>
+        <p class="lede" style="font-size:15px">The funding to preserve these languages already exists — it's just spent slowly, one grant at a time, with no verifiable quality signal. Subnet emissions bootstrap supply; these buyers convert that vetted data into recurring revenue.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Buyer</th><th>What they pay for</th></tr></thead>
+            <tbody>
+              <tr><td class="who">Mozilla Common Voice</td><td>Volunteer-driven corpus, with adjacent Mozilla / MLCommons grants funding collection campaigns for low-resource Chinese-language pairs</td></tr>
+              <tr><td class="who">国家语言文字工作委员会</td><td>数字化方言 (dialect digitization) — multi-year line items in the 14th & 15th Five-Year Plans</td></tr>
+              <tr><td class="who">UNESCO</td><td>Endangered-language preservation grant programs</td></tr>
+              <tr><td class="who">iFlytek · Baidu · Alibaba</td><td>Procurement of training data for in-house Chinese-language ASR / TTS pipelines</td></tr>
+              <tr><td class="who">Ethnology departments</td><td>Field-research corpora — Minzu University, SOAS, et al.</td></tr>
+              <tr><td class="who">Diaspora apps</td><td>Heritage-language conversation models — HiNative, Drops, Tandem</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── LINEAGE ── -->
+      <section class="route" id="route-lineage">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Subnet lineage</h1>
+        <p class="lede" style="font-size:15px">We aren't reinventing the wheel. LanguageArk-CN stands on three existing subnets and the official bittensor template — every line below is reused pattern.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Subnet / source</th><th>What we reuse</th><th>What we change</th></tr></thead>
+            <tbody>
+              <tr><td class="who">SN37 Finetuning (Macrocosmos)</td><td>Tournament-style held-out eval; <code>loss_curve_hash</code> proof-of-training; weekly corpus rotation</td><td>Generic LLM finetune → per-language ASR/MT; eval is FLORES-200 yue / nan</td></tr>
+              <tr><td class="who">SN1 Apex (Macrocosmos)</td><td>LLM-as-judge validator pattern; single-shot back-translation scoring</td><td>Judge is sponsor's GLM-4.6 (or Claude); back-translation is direction-specific</td></tr>
+              <tr><td class="who">SN13 Data Universe (Macrocosmos)</td><td>Crowdsourced data sourcing, <code>dataset_hash</code> commits</td><td>Source isn't scraped — it's native-speaker contribution, stake-gated</td></tr>
+              <tr><td class="who"><code>latent-to/bittensor-subnet-template</code></td><td>Synapse types; miner / validator skeleton; chain probe</td><td>Three Synapse subclasses (HokkienASR / MT / TTS); real Glicko-2; Solidity DAO</td></tr>
+              <tr><td class="who">Yuma commit-reveal docs</td><td><code>commit_reveal_period</code> semantics; weight-commit hash format</td><td>Set to 5 (vs default 0); proves the attack delta with a sim</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="section">Genuinely new (the 创意 part)</h2>
+        <div class="grid">
+          <div class="card"><div class="ico">🪪</div><h3>Stake-bonded speaker DAO</h3><p>No existing subnet has an on-chain stake-and-attestation registry for human evaluators. Our Solidity contract is the org / anti-Sybil novelty.</p></div>
+          <div class="card"><div class="ico">🧮</div><h3>3-signal composite</h3><p>SN37 uses single-signal eval; SN1 uses single-signal LLM judge. We compose Elo + back-translation + held-out FLORES so fooling two requires fooling the third independently.</p></div>
+          <div class="card"><div class="ico">🧩</div><h3>Cross-script Hokkien framing</h3><p>SeamlessM4T-v2 has no <code>__nan__</code>; FLORES has only Latin-script <code>nan_Latn</code>. Building a real Han-script Hokkien corpus IS the deliverable.</p></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  // ── routing ──────────────────────────────────────────────────
+  const routes = ["home","rubric","mechanism","attack","scorer","buyers","lineage"];
+  const labels = {home:"Overview",rubric:"Ideathon rubric",mechanism:"Mechanism",attack:"Attack simulator",scorer:"Score a translation",buyers:"Buyers",lineage:"Subnet lineage"};
+  function go(r){
+    if(!routes.includes(r)) r = "home";
+    document.querySelectorAll(".route").forEach(s=>s.classList.toggle("is-active",s.id==="route-"+r));
+    document.querySelectorAll("nav.side a[data-route]").forEach(a=>a.classList.toggle("active",a.dataset.route===r));
+    const cr = document.getElementById("crumb-here"); if(cr) cr.textContent = labels[r];
+    document.title = "LanguageArk-CN · " + labels[r];
+    window.scrollTo({top:0,behavior:"instant"});
+    document.getElementById("sidebar")?.classList.remove("open");
+  }
+  function readHash(){ return (location.hash.replace(/^#\//,"") || "home"); }
+  window.addEventListener("hashchange", ()=>go(readHash()));
+  go(readHash());
+
+  // mobile menu
+  document.getElementById("menu-btn")?.addEventListener("click",()=>{
+    document.getElementById("sidebar")?.classList.toggle("open");
+  });
+
+  // build time
+  const bt = document.getElementById("build-ts");
+  if(bt) bt.textContent = "__BUILD_TS__";
+
+  // ── attack simulator ────────────────────────────────────────
+  function simAttack(crPeriod, drift){
+    // Honest validator: always vTrust = 1.0 (full score for accurate work)
+    // Freeloader copies the previous-reveal weights and reuses them for `crPeriod` tempos.
+    // Stale distance grows linearly with drift per tempo.
+    const tempos = 12;
+    let stalenessAcc = 0;
+    for(let t=0;t<tempos;t++){
+      const stale = Math.min(1, drift * (t % Math.max(1, crPeriod)));
+      stalenessAcc += 1 - stale;
+    }
+    const freeloader = stalenessAcc / tempos; // mean vTrust over window
+    return { honest:1.0, freeloader };
+  }
+  function refreshAttack(){
+    const cr = +document.getElementById("cr").value;
+    const driftPct = +document.getElementById("drift").value;
+    const drift = driftPct/100;
+    document.getElementById("cr-out").textContent = cr;
+    document.getElementById("drift-out").textContent = drift.toFixed(2);
+
+    const r = simAttack(cr, drift);
+    document.getElementById("bar-honest").style.width = (r.honest*100).toFixed(0)+"%";
+    document.getElementById("bar-free").style.width = (r.freeloader*100).toFixed(0)+"%";
+    document.getElementById("num-honest").textContent = r.honest.toFixed(2);
+    document.getElementById("num-free").textContent = r.freeloader.toFixed(2);
+
+    const verdict = document.getElementById("attack-verdict");
+    const knockout = document.getElementById("attack-knockout");
+    const recco = document.getElementById("attack-recco");
+    if(r.freeloader > 0.85){
+      verdict.innerHTML = '<span class="badge warn">YES — works</span>';
+      knockout.textContent = "—";
+      recco.textContent = "Raise CR period";
+    } else if(r.freeloader > 0.5){
+      verdict.innerHTML = '<span class="badge warn">partial</span>';
+      knockout.textContent = ((1-r.freeloader)*100).toFixed(0)+"%";
+      recco.textContent = "Still leaks; push to 5+";
+    } else {
+      verdict.innerHTML = '<span class="badge go">DEFEATED</span>';
+      knockout.textContent = ((1-r.freeloader)*100).toFixed(0)+"%";
+      recco.textContent = "Ship this config";
+    }
+  }
+  document.getElementById("cr")?.addEventListener("input", refreshAttack);
+  document.getElementById("drift")?.addEventListener("input", refreshAttack);
+  refreshAttack();
+
+  // ── chrF++ scorer ────────────────────────────────────────────
+  function ngrams(s, n){
+    const out = new Map();
+    for(let i=0;i<=s.length-n;i++){
+      const g = s.slice(i,i+n);
+      out.set(g, (out.get(g)||0)+1);
+    }
+    return out;
+  }
+  function fscore(p, r, beta){
+    if(p===0 && r===0) return 0;
+    const b2 = beta*beta;
+    return (1+b2)*p*r / (b2*p + r + 1e-12);
+  }
+  function chrf(pred, gold, beta=2, maxN=6){
+    if(!pred || !gold) return 0;
+    let acc = 0; let used = 0;
+    for(let n=1;n<=maxN;n++){
+      if(pred.length<n || gold.length<n) continue;
+      const pg = ngrams(pred, n), gg = ngrams(gold, n);
+      let pCount=0, gCount=0, match=0;
+      pg.forEach((c,k)=>{pCount+=c; if(gg.has(k)) match+=Math.min(c, gg.get(k));});
+      gg.forEach((c)=>gCount+=c);
+      const prec = pCount? match/pCount : 0;
+      const rec  = gCount? match/gCount : 0;
+      acc += fscore(prec, rec, beta);
+      used++;
+    }
+    return used? acc/used : 0;
+  }
+  function refreshScorer(){
+    const pred = document.getElementById("pred").value;
+    const gold = document.getElementById("gold").value;
+    const c = chrf(pred, gold);
+    const ps = new Set([...pred]); const gs = new Set([...gold]);
+    let inter=0; ps.forEach(x=>{if(gs.has(x))inter++;});
+    const overlap = ps.size+gs.size? inter / new Set([...ps,...gs]).size : 0;
+    const lr = gold.length? Math.min(1, pred.length/gold.length) : 0;
+    const composite = 0.4*0.65 + 0.3*1.0 + 0.3*c; // illustrative
+    document.getElementById("chrf").textContent = c.toFixed(3);
+    document.getElementById("overlap").textContent = overlap.toFixed(3);
+    document.getElementById("lratio").textContent = lr.toFixed(2);
+    document.getElementById("composite").textContent = composite.toFixed(3);
+  }
+  document.getElementById("pred")?.addEventListener("input", refreshScorer);
+  document.getElementById("gold")?.addEventListener("input", refreshScorer);
+  document.querySelectorAll("#route-scorer .card[data-pred]").forEach(c=>{
+    c.addEventListener("click",()=>{
+      document.getElementById("pred").value = c.dataset.pred;
+      document.getElementById("gold").value = c.dataset.gold;
+      refreshScorer();
+    });
+  });
+  refreshScorer();
+</script>
+
+</body>
+</html>
+"""
+_product_out = PRODUCT.replace("__BUILD_TS__", _dt.datetime.now(_dt.UTC).strftime("%Y-%m-%d %H:%M UTC"))
+(SITE / "index.html").write_text(_product_out)
+print(f"wrote {SITE / 'index.html'} ({len(_product_out):,} bytes)  ← user-facing /")
+
+
+# ─── /whitepaper and /partners — markdown → light-theme HTML ─────────────
+def _render_markdown_page(md_path: Path, out_dir: Path, title: str, subtitle: str) -> None:
+    import markdown as _md
+
+    body = _md.markdown(
+        md_path.read_text(),
+        extensions=["fenced_code", "tables", "toc", "sane_lists"],
+    )
+    page = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title} — LanguageArk-CN</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{{--bg:#fafbfc;--surface:#fff;--surface-2:#f3f4f6;--border:#e5e7eb;
+    --fg:#0f172a;--fg-2:#475569;--muted:#94a3b8;--brand:#6d28d9;
+    --code-bg:#0f172a;--code-fg:#e2e8f0}}
+  *{{box-sizing:border-box}}
+  body{{font:15.5px/1.7 'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--fg);background:var(--bg);margin:0;-webkit-font-smoothing:antialiased}}
+  a{{color:var(--brand);text-decoration:none}}
+  a:hover{{text-decoration:underline}}
+  code{{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;font-size:13px}}
+  pre{{background:var(--code-bg);color:var(--code-fg);padding:16px 18px;border-radius:10px;overflow:auto;font:13px/1.55 'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}}
+  pre code{{background:transparent;padding:0;color:inherit;font-size:inherit}}
+  .topbar{{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--border)}}
+  .topbar-inner{{max-width:880px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}}
+  .logo{{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}}
+  .brand{{font-weight:600;font-size:15px;letter-spacing:-.01em}}
+  .brand small{{color:var(--fg-2);font-weight:400;margin-left:6px}}
+  .nav{{margin-left:auto;display:flex;gap:18px;font-size:14px;color:var(--fg-2)}}
+  .nav a{{color:var(--fg-2)}}
+  main{{max-width:780px;margin:0 auto;padding:36px 24px 80px}}
+  .eyebrow{{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}}
+  h1{{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;font-weight:700}}
+  h1 + p{{color:var(--fg-2);margin:0 0 28px;font-size:16.5px}}
+  article h1{{font-size:26px;margin-top:36px}}
+  article h2{{font-size:21px;margin-top:36px;padding-bottom:6px;border-bottom:1px solid var(--border)}}
+  article h3{{font-size:17px;margin-top:28px}}
+  article p{{color:var(--fg)}}
+  article ul,article ol{{padding-left:22px;color:var(--fg-2)}}
+  article li{{margin:4px 0}}
+  article blockquote{{border-left:3px solid var(--brand);background:var(--surface-2);margin:18px 0;padding:10px 16px;color:var(--fg-2);border-radius:0 6px 6px 0}}
+  article table{{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;margin:14px 0;display:block;overflow-x:auto}}
+  article th,article td{{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface)}}
+  article th{{background:var(--surface-2);color:var(--fg-2);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}}
+  footer{{color:var(--muted);font-size:12.5px;text-align:center;padding:32px 24px;border-top:1px solid var(--border);margin-top:40px}}
+  @media (max-width:640px){{h1{{font-size:26px}} main{{padding:24px 16px 60px}}}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+    <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/whitepaper/">Whitepaper</a>
+      <a href="/partners/">Partners</a>
+      <a href="/slides.html">Slides</a>
+      <a href="/notes/">Notes</a>
+    </nav>
+  </div>
+</div>
+<main>
+  <div class="eyebrow">{subtitle}</div>
+  <h1>{title}</h1>
+  <article>
+  {body}
+  </article>
+</main>
+<footer>LanguageArk-CN · <a href="/">home</a> · <a href="/notes/">engineering notes</a></footer>
+</body>
+</html>"""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "index.html").write_text(page)
+    print(f"wrote {out_dir / 'index.html'} ({len(page):,} bytes)")
+
+
+_render_markdown_page(ROOT / "whitepaper.md", SITE / "whitepaper", "Whitepaper", "Mechanism design — full document")
+_render_markdown_page(ROOT / "partners.md", SITE / "partners", "Partners", "Hokkien diaspora orgs we're talking to")

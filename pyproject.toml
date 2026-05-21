@@ -10,6 +10,7 @@ dependencies = [
     "numpy>=1.26",
     "click>=8.1",
     "python-dotenv>=1.0",
+    "anthropic>=0.40",
 ]
 
 [project.optional-dependencies]
@@ -17,7 +18,13 @@ miner = [
     "transformers>=4.40",
     "torch>=2.2",
     "torchaudio>=2.2",
+    "sentencepiece>=0.2",
     "librosa>=0.10",
+    "soundfile>=0.12",
+    "accelerate>=0.30",
+]
+chain = [
+    "bittensor>=9",
 ]
 dev = [
     "pytest>=8.0",

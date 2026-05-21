@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Whitepaper — LanguageArk-CN</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fafbfc;--surface:#fff;--surface-2:#f3f4f6;--border:#e5e7eb;
+    --fg:#0f172a;--fg-2:#475569;--muted:#94a3b8;--brand:#6d28d9;
+    --code-bg:#0f172a;--code-fg:#e2e8f0}
+  *{box-sizing:border-box}
+  body{font:15.5px/1.7 'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--fg);background:var(--bg);margin:0;-webkit-font-smoothing:antialiased}
+  a{color:var(--brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;font-size:13px}
+  pre{background:var(--code-bg);color:var(--code-fg);padding:16px 18px;border-radius:10px;overflow:auto;font:13px/1.55 'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre code{background:transparent;padding:0;color:inherit;font-size:inherit}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--border)}
+  .topbar-inner{max-width:880px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}
+  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}
+  .brand{font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .brand small{color:var(--fg-2);font-weight:400;margin-left:6px}
+  .nav{margin-left:auto;display:flex;gap:18px;font-size:14px;color:var(--fg-2)}
+  .nav a{color:var(--fg-2)}
+  main{max-width:780px;margin:0 auto;padding:36px 24px 80px}
+  .eyebrow{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+  h1{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;font-weight:700}
+  h1 + p{color:var(--fg-2);margin:0 0 28px;font-size:16.5px}
+  article h1{font-size:26px;margin-top:36px}
+  article h2{font-size:21px;margin-top:36px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  article h3{font-size:17px;margin-top:28px}
+  article p{color:var(--fg)}
+  article ul,article ol{padding-left:22px;color:var(--fg-2)}
+  article li{margin:4px 0}
+  article blockquote{border-left:3px solid var(--brand);background:var(--surface-2);margin:18px 0;padding:10px 16px;color:var(--fg-2);border-radius:0 6px 6px 0}
+  article table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;margin:14px 0;display:block;overflow-x:auto}
+  article th,article td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface)}
+  article th{background:var(--surface-2);color:var(--fg-2);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+  footer{color:var(--muted);font-size:12.5px;text-align:center;padding:32px 24px;border-top:1px solid var(--border);margin-top:40px}
+  @media (max-width:640px){h1{font-size:26px} main{padding:24px 16px 60px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+    <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/whitepaper/">Whitepaper</a>
+      <a href="/partners/">Partners</a>
+      <a href="/slides.html">Slides</a>
+      <a href="/notes/">Notes</a>
+    </nav>
+  </div>
+</div>
+<main>
+  <div class="eyebrow">Mechanism design — full document</div>
+  <h1>Whitepaper</h1>
+  <article>
+  <h1 id="languageark-cn-whitepaper">LanguageArk-CN — Whitepaper</h1>
+<p><strong>Version 0.1 · May 16, 2026</strong>
+<strong>Hackathon target:</strong> Proof of Intelligence (Shanghai, May 23, 2026)</p>
+<hr />
+<h2 id="1-problem">1. Problem</h2>
+<p>130+ Chinese-language families and minority languages have no commercial ML support: no ASR, no TTS, no machine translation. They die at the rate of one generation per language.</p>
+<p>Existing AI labs (OpenAI, Anthropic, Google) <strong>structurally cannot solve this</strong> — these languages have no commercial training data, no large supervised dataset, and no centralized buyer. Bittensor's incentive layer is uniquely suited because:</p>
+<ol>
+<li>Native speakers exist globally but aren't paid to contribute</li>
+<li>Multiple miners can train competing models with no central authority</li>
+<li>The ground truth (does the model work for a native speaker?) is decentralized</li>
+<li>Yuma Consensus naturally bonds validators to miners that improve the asset</li>
+</ol>
+<h2 id="2-why-hokkien-for-v1">2. Why Hokkien for v1</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Meta chose Hokkien for SeamlessM4T (Oct 2022)</td>
+<td>Strongest "hardest case" narrative</td>
+</tr>
+<tr>
+<td>No standardized written form</td>
+<td>ASR cannot cheat via text lookup</td>
+</tr>
+<tr>
+<td>50M speakers across Fujian, Taiwan, Singapore, Malaysia</td>
+<td>Real diaspora buyer base</td>
+</tr>
+<tr>
+<td>Open baseline exists (Meta HK↔EN S2ST)</td>
+<td>Forkable, improvable starting point</td>
+</tr>
+<tr>
+<td>Common Voice <code>nan-tw</code> corpus exists</td>
+<td>Validation data available day-1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-mechanism-design">3. Mechanism design</h2>
+<h3 id="31-actors">3.1 Actors</h3>
+<pre><code>                       ┌─────────────────────────┐
+                       │ Native-speaker DAO      │
+                       │ (per language)          │
+                       │ stake-bonded; 2-of-3    │
+                       │ attestation for speakers│
+                       └────────┬────────────────┘
+                                │ pairwise Elo
+                                ▼
+   ┌──────────┐  Synapse   ┌──────────┐  GLM-4.6   ┌──────────┐
+   │  Miners  │ ─────────▶ │ Validators│ ─────────▶│  Yuma    │
+   │ (ASR/TTS/│ audio+text │           │ BLEU+FLORES│ Consensus│
+   │   MT)    │            │  composite│           │ 41/41/18 │
+   └──────────┘            │ score 0-1 │           └──────────┘
+                            └──────────┘
+</code></pre>
+<h3 id="32-the-composite-score">3.2 The composite score</h3>
+<p>For each miner <code>m</code> over an evaluation window:</p>
+<pre><code>score(m) = w_elo · Elo_norm(m)
+        + w_bleu · BLEU_bt(m)
+        + w_flores · FLORES200(m)
+</code></pre>
+<p>with default weights <code>w_elo = 0.4</code>, <code>w_bleu = 0.3</code>, <code>w_flores = 0.3</code> (governance-tunable).</p>
+<h4 id="321-elo-signal">3.2.1 Elo signal</h4>
+<p>Pairwise comparisons by registered native speakers. A speaker is shown two candidate outputs (e.g. two ASR transcripts of the same Hokkien audio) and votes. Updated via <strong>Glicko-2</strong> (handles uncertainty + inactivity decay).</p>
+<p>Normalization to <code>[0, 1]</code>:</p>
+<pre><code>Elo_norm(m) = sigmoid((rating(m) - 1500) / 400)
+</code></pre>
+<h4 id="322-back-translation-bleu-the-glm-46-signal">3.2.2 Back-translation BLEU (the GLM-4.6 signal)</h4>
+<p>For translation/transcription tasks:</p>
+<pre><code>text_hokkien --[miner]--&gt; text_mandarin
+text_mandarin --[GLM-4.6]--&gt; text_hokkien_round_trip
+BLEU_bt = sacreBLEU(text_hokkien, text_hokkien_round_trip)
+</code></pre>
+<p>GLM-4.6 chosen because:
+- Sponsor (Zhipu) is in the judging room
+- Outperforms GPT-4 on Chinese-language benchmarks (C-Eval, CMMLU)
+- Free credits via sponsor allocation
+- Domestic API (no GFW risk during Shanghai demo)</p>
+<h4 id="323-flores-200-held-out">3.2.3 FLORES-200 held-out</h4>
+<p>Public sentence-level test set; rotated weekly to prevent overfitting. Hokkien (nan) is a covered FLORES language.</p>
+<h3 id="33-validator-weight-vector">3.3 Validator weight vector</h3>
+<p>Every tempo, each validator submits a weight vector <code>W_i</code> where <code>W_ij = score(miner j)</code>. Validators MUST commit-reveal (see §4.1).</p>
+<h3 id="34-yuma-processing-chain-side">3.4 Yuma processing (chain side)</h3>
+<p>Standard Yuma Consensus v3 (no fork). The subnet leverages:</p>
+<ul>
+<li>Stake-weighted median consensus C_j to clip outliers</li>
+<li>κ-clipping at <code>kappa = 0.6</code> (above default 0.5)</li>
+<li>Bonds EMA at <code>bonds_moving_avg = 900_000</code></li>
+<li>41% miner / 41% validator+stakers / 18% subnet-owner split</li>
+</ul>
+<h2 id="4-anti-gaming-defenses">4. Anti-gaming defenses</h2>
+<h3 id="41-weight-copying-commit-reveal">4.1 Weight copying — Commit-reveal</h3>
+<p>Without defense: anyone reads on-chain weights and copies the consensus, harvesting vTrust for free.</p>
+<p><strong>Defense:</strong> <code>commit_reveal_period = 5 tempos</code> (~6 hours). Validators submit <code>hash(weights || nonce)</code> now; reveal <code>(weights, nonce)</code> 5 tempos later. Late reveals are slashed.</p>
+<pre><code>At tempo t:    submit H = sha256(W_t || nonce_t)
+At tempo t+5:  reveal (W_t, nonce_t); chain verifies H
+</code></pre>
+<h3 id="42-validator-cabal-clipping">4.2 Validator cabal — κ-clipping</h3>
+<p>Default Yuma already clips at κ ≈ 0.5. We raise to <code>kappa = 0.6</code>, requiring &gt;60% stake to move consensus on any miner.</p>
+<h3 id="43-sybil-speakers-dao-2-of-3-attestation">4.3 Sybil speakers — DAO 2-of-3 attestation</h3>
+<p>A registered native speaker must:</p>
+<ol>
+<li>Stake <code>100 TAO</code> (slashable)</li>
+<li>Be attested by 2 of 3 active speaker-validators for that language</li>
+<li>Lose stake on retraction (e.g. if downstream Elo votes consistently disagree with FLORES + BLEU signals)</li>
+</ol>
+<p>The DAO is per-language, bootstrapped via grant: Hokkien speakers in Singapore/Penang/Manila/Fujian community orgs.</p>
+<h3 id="44-sybil-miners-burn-cost-immunity-deregistration">4.4 Sybil miners — burn cost + immunity + deregistration</h3>
+<p>Standard Bittensor: dynamic burn cost (~3000+ TAO at network level), <code>immunity_period = 5000 blocks</code>, lowest-incentive miners deregistered each interval.</p>
+<h3 id="45-model-copying-proof-of-training">4.5 Model copying — proof of training</h3>
+<p>Miners commit <code>sha256(loss_curve || dataset_hash || final_weights_hash)</code> before serving on chain. A copied model has a discontinuous loss curve when audited.</p>
+<h3 id="46-bond-whipsaw-tight-liquid-">4.6 Bond whipsaw — tight liquid-α</h3>
+<pre><code>alpha_low  = 0.05   (655 in u16)
+alpha_high = 0.35   (22937 in u16)
+</code></pre>
+<p>Default Bittensor (<code>0.1</code>/<code>0.8</code>) is too loose; whales whipsaw α to escape consensus penalty. Tight bounds at 0.05–0.35 give bonds 3–20 epoch memory — enough to penalize misbehavior, slow enough to prevent gaming.</p>
+<h3 id="47-min-weight-spread">4.7 Min-weight spread</h3>
+<pre><code>min_allowed_weights = 16
+</code></pre>
+<p>Validators MUST spread weight across at least 16 miners. Single-miner cabal pumps fail.</p>
+<h2 id="5-hyperparameter-summary-subnet-create-call">5. Hyperparameter summary (subnet-create call)</h2>
+<pre><code class="language-python">sn = bittensor.subtensor().create_subnet(
+    netuid=NEW,
+    tempo=360,
+    immunity_period=5_000,
+    activity_cutoff=5_000,
+    kappa=0.6,                          # 39320 in u16
+    alpha_low=0.05,                     # 3277 in u16
+    alpha_high=0.35,                    # 22937 in u16
+    bonds_moving_avg=900_000,
+    min_allowed_weights=16,
+    max_weights_limit=2**16 - 1,
+    weights_rate_limit=100,
+    commit_reveal_period=5,             # tempos
+    min_burn=int(0.0005e9),             # 0.0005 TAO in rao
+    max_burn=int(100e9),                # 100 TAO in rao
+)
+</code></pre>
+<h2 id="6-economics">6. Economics</h2>
+<p>Per epoch (<code>tempo = 360</code> blocks, ~72 min) alpha distribution:</p>
+<ul>
+<li><strong>41%</strong> → miners, distributed by incentive <code>I = normalize(W'ᵀ · S)</code></li>
+<li><strong>41%</strong> → validators + their delegators, distributed by dividends <code>D = normalize(B · I)</code></li>
+<li><strong>18%</strong> → subnet owner (LanguageArk-CN treasury)</li>
+</ul>
+<h3 id="owner-treasury-usage">Owner-treasury usage</h3>
+<p>The 18% owner cut funds:
+1. <strong>Speaker-DAO bootstrapping grants</strong> (paying first 100 native speakers per language)
+2. <strong>FLORES test-set rotation</strong> (paid corpus curation)
+3. <strong>GLM API costs</strong> (until Zhipu credits exhausted)
+4. <strong>Compute for held-out evaluation</strong> (validator-side, not gameable)</p>
+<h2 id="7-roadmap">7. Roadmap</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Deliverable</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>v0 (this hackathon)</strong></td>
+<td>Hokkien-only working prototype + whitepaper + slides</td>
+<td>May 23</td>
+</tr>
+<tr>
+<td><strong>v0.5</strong></td>
+<td>Speaker-DAO recruited (50 Hokkien speakers across Fujian/Taiwan/SG)</td>
+<td>Q3 2026</td>
+</tr>
+<tr>
+<td><strong>v1</strong></td>
+<td>Mainnet subnet registration; Cantonese + Hakka added</td>
+<td>Q4 2026</td>
+</tr>
+<tr>
+<td><strong>v2</strong></td>
+<td>Tibetan, Uyghur, Mongolian onboarded with regional DAO partners</td>
+<td>2027</td>
+</tr>
+<tr>
+<td><strong>v3</strong></td>
+<td>API gateway: Mozilla Common Voice + UNESCO + State Language Commission paying for endpoints</td>
+<td>2027</td>
+</tr>
+</tbody>
+</table>
+<h2 id="8-risks-mitigations">8. Risks &amp; Mitigations</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Native speakers won't show up</td>
+<td>Pre-LOI with 3 Hokkien diaspora orgs (Penang, Singapore, San Francisco)</td>
+</tr>
+<tr>
+<td>Politically sensitive minority languages (Uyghur, Tibetan)</td>
+<td>Launch China-mainland-safe languages first (Hokkien, Cantonese, Hakka, Wu); add minority languages via international DAO branches</td>
+</tr>
+<tr>
+<td>GLM-4.6 API quotas</td>
+<td>Multi-provider failover (Qwen, ERNIE, DeepSeek-V3 as fallback)</td>
+</tr>
+<tr>
+<td>BLEU is gameable</td>
+<td>Triple signal (Elo + BLEU + FLORES) means BLEU alone cannot dominate</td>
+</tr>
+<tr>
+<td>Yuma constants may change</td>
+<td>Spec frozen against chain spec ver TBD; auto-upgrade via owner multisig</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-why-we-win-this-ideathon">9. Why we win this ideathon</h2>
+<table>
+<thead>
+<tr>
+<th>Judging axis</th>
+<th>Our answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>产品力 (product)</strong></td>
+<td>Concrete buyer list with budget lines; underserved $XXM market</td>
+</tr>
+<tr>
+<td><strong>组织力 (organization)</strong></td>
+<td>Native-speaker DAOs solve the global-coordination problem; explicit grant-bootstrapping plan</td>
+</tr>
+<tr>
+<td><strong>验证力 (verification)</strong></td>
+<td>3 independent signals — Elo + BLEU + FLORES — automatable in code (this repo)</td>
+</tr>
+<tr>
+<td><strong>博弈力 (game-theory)</strong></td>
+<td>Commit-reveal + κ=0.6 + tight α + min-weight-spread + proof-of-training; each defends a known attack with a specific hyperparam</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-a-pseudocode-for-the-validator-scoring-loop">Appendix A: Pseudocode for the validator scoring loop</h2>
+<pre><code class="language-python">def score_miner(miner_uid: int, eval_window: list[EvalSample]) -&gt; float:
+    # 1. Elo signal (cached from speaker DAO)
+    elo = speaker_dao.elo(miner_uid, lang=&quot;nan&quot;)
+    elo_norm = sigmoid((elo - 1500) / 400)
+
+    # 2. BLEU back-translation signal
+    bleu_scores = []
+    for sample in eval_window:
+        mandarin = query_miner(miner_uid, sample.hokkien_audio)
+        back = glm.translate(mandarin, src=&quot;zh&quot;, tgt=&quot;nan&quot;)
+        bleu_scores.append(sacrebleu.sentence_bleu(sample.hokkien_text, [back]).score / 100)
+    bleu = np.mean(bleu_scores)
+
+    # 3. FLORES held-out
+    flores = evaluate_on_flores(miner_uid, lang=&quot;nan&quot;,
+                                 seed=current_tempo // 7)  # rotates weekly
+
+    return 0.4 * elo_norm + 0.3 * bleu + 0.3 * flores
+</code></pre>
+<h2 id="appendix-b-references">Appendix B: References</h2>
+<ul>
+<li><a href="https://docs.learnbittensor.org/learn/yuma-consensus">Yuma Consensus v3 docs</a></li>
+<li><a href="https://docs.learnbittensor.org/concepts/commit-reveal">Commit-Reveal pattern</a></li>
+<li><a href="https://about.fb.com/news/2022/10/hokkien-ai-speech-translation/">Meta SeamlessM4T Hokkien announcement (2022)</a></li>
+<li><a href="https://github.com/facebookresearch/flores">FLORES-200 dataset</a></li>
+<li><a href="https://commonvoice.mozilla.org/nan-tw">Common Voice nan-tw</a></li>
+<li><a href="http://www.glicko.net/glicko/glicko2.pdf">Glicko-2 system (Glickman)</a></li>
+<li><a href="https://open.bigmodel.cn/dev/api">Zhipu GLM-4.6 API</a></li>
+</ul>
+  </article>
+</main>
+<footer>LanguageArk-CN · <a href="/">home</a> · <a href="/notes/">engineering notes</a></footer>
+</body>
+</html>

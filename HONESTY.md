@@ -10,7 +10,7 @@ A submission like this is easy to oversell. This page is the unvarnished status.
 - **chrF++ and WER are real metrics.** From `sacrebleu`, the same package WMT uses.
 - **Glicko-2 is a real implementation.** Full Illinois-algorithm volatility update; tested for monotonicity, draws, and inactivity decay.
 - **Attack simulator behaves like real Yuma.** Power-law miner weights + drift-aware vTrust computation. 100% (vulnerable) vs 42% (with commit-reveal) is reproducible.
-- **38/51 tests are honest verifications** of the above — not assertions of mock state.
+- **57 Python tests + 8 Solidity tests (65 total) all pass.** Speaker DAO contract added 8 forge tests; AnthropicJudge + miner wrappers added pytest cases.
 
 ## What's a TOY ⚠️
 
@@ -20,10 +20,10 @@ These are real engineering gaps. A grant-funded continuation would close them.
 |---|---|---|
 | "Hokkien speech subnet" | Zero real audio in the demo. No Whisper / SeamlessM4T model loaded. | ~2 hours to wire `facebook/seamless-m4t-v2-large` and feed Common Voice nan-tw audio. Limited by ~10 GB model download. |
 | "Hokkien validation corpus" | 10 hand-curated sentence pairs from MoE dictionary. FLORES-200 has no Hokkien (we use Cantonese as a proxy). | Long-term: build the corpus *via* the subnet's speaker DAO — that's the v1 product. Short-term: scrape Wikipedia zh-min-nan parallel articles. |
-| "Speaker DAO" | A JSON file with stake/attest fields. No real on-chain stake, no slashing. | A minimal Solidity contract using the Staking V2 precompile (`0x0000…0805`). ~80 lines, deployable to Subtensor EVM in an afternoon. |
+| ~~"Speaker DAO"~~ ✅ **closed 2026-05-16** | Real Solidity contract `contracts/src/SpeakerDAO.sol` (~130 lines): stake + 2-of-3 attestation + slash + on-chain Glicko rating writeback. 8 forge tests pass; e2e deploy + stake + attest + register + vote + setRating verified on local anvil via `scripts/deploy_speaker_dao_local.py`. | Production: swap minStake from native ETH → Subtensor EVM staking precompile `0x…0805`. |
 | "Commit-reveal" | The validator prints a SHA-256 hash; we don't actually wait 5 tempos. | The bittensor SDK has `subtensor.commit_weights(netuid, weights, salt)` and `reveal_weights()`. ~10 lines of wiring once a netuid is registered. |
 | "Mainnet btcli sheet" | `subnet_register.py` prints commands but never executes them. | Run them. Costs ~3,000+ TAO at current burn rates. We have a hackathon-budget. |
-| "MockGLMClient" | Character-set Jaccard similarity over a 60-pair corpus. NOT real back-translation. | Real GLM-4.6 API call (1 env var + ~$0.001/sentence). The code path already exists; just needs `ZHIPU_API_KEY`. |
+| ~~"MockGLMClient"~~ ✅ **closed 2026-05-16** | Real `GLMClient` (Zhipu, gated on `ZHIPU_API_KEY`) AND real `AnthropicJudge` (Claude, gated on `ANTHROPIC_API_KEY`) both wired into `make_glm()` factory. Mock is now last-resort only. 3 new tests cover factory order + Anthropic round-trip. | At the event: `export ZHIPU_API_KEY=…` to switch from Claude → GLM for sponsor optics. |
 | "Yuma consensus simulator" | A 200-line Python model. Real Yuma is a Rust runtime pallet with substrate-level state. | Run an actual `subtensor --chain dev` node locally (fast-block mode, 250ms blocks). Documented in the SubtensorAPI docs but takes a day to wire reliably. |
 | "Per-miner outputs" | Deterministic character-dropout of the gold reference. NOT actual model outputs. | Load 3 different Hokkien Whisper checkpoints (small / medium / SeamlessM4T-v2) — get genuinely different translations. |
 
