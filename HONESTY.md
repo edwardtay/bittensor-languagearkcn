@@ -31,12 +31,11 @@ These are real engineering gaps. A grant-funded continuation would close them.
 
 In priority order, with rough effort estimates:
 
-1. **Real Whisper-Hokkien miner** (1 day): wire `seamless-m4t-v2-large` + load Common Voice nan-tw audio. Show real WER deltas across model sizes.
-2. **Local subtensor + real registration** (2 days): `docker run subtensor/subtensor:latest --chain dev`, register on a local testnet, run miner+validator extrinsics for real.
-3. **Speaker DAO contract** (1 day): minimal Solidity using Subtensor EVM precompiles; replace JSON shim.
-4. **Real GLM-4.6 evaluation pipeline** (4 hours): swap `MockGLMClient` for actual API calls, evaluate against held-out FLORES yue_Hant. Get sponsor-quality BLEU numbers.
-5. **Glicko-2 calibration** (4 hours): currently we use defaults; measure against a real annotated dataset.
-6. **Recruit 5 actual Hokkien speakers** (~weeks of outreach to orgs listed in `partners.md`) — sign LOIs, run a tiny live trial.
+1. **Real Whisper / SeamlessM4T-v2 miner end-to-end** (1 day): `seamless_miner.py` is wired; remaining work is loading Common Voice `nan-tw` audio at scale and measuring per-checkpoint WER on a held-out split.
+2. **Local subtensor + real registration** (2 days): `docker run subtensor/subtensor:latest --chain dev`, register on testnet, run real miner+validator extrinsics. The btcli sheet is already in `subnet_register.py`.
+3. **Speaker DAO contract → mainnet** (1 day): contract + tests already exist (`contracts/`); remaining work is swapping native-ETH stake for the Subtensor EVM staking precompile.
+4. **Glicko-2 calibration** (4 hours): currently defaults; measure against real annotated dataset.
+5. **Recruit 5 actual Hokkien speakers** (~weeks of outreach to orgs in `partners.md`) — sign LOIs, run a tiny live trial.
 
 ## Why this is still a winning ideathon submission
 

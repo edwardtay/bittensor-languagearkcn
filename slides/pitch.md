@@ -164,7 +164,7 @@ $ bash demo.sh
 ❼  Buyer list
 ```
 
-Runs in **5 seconds**. No API key required (mock-GLM fallback).
+Runs in **2.3 seconds**. No API key required (Claude / GLM judges optional).
 
 ---
 
@@ -172,12 +172,12 @@ Runs in **5 seconds**. No API key required (mock-GLM fallback).
 
 | Axis | Our answer |
 |---|---|
-| **产品力** | Named buyers w/ budget lines; underserved $XXM market |
-| **组织力** | Per-language stake-bonded DAOs; partner list ready |
-| **验证力** | 3 independent signals; **runs live in <500 LoC** |
-| **博弈力** | 6 attacks → 6 named defenses → **simulator proves it** |
+| **产品力** | 6 named buyer categories w/ real budget lines (Mozilla · 国家语委 · UNESCO · iFlytek · diaspora apps) |
+| **组织力** | Per-language stake-bonded DAOs; on-chain Solidity contract (8 forge tests); 4 partner hubs scoped |
+| **验证力** | 3 independent signals; real `bt.Synapse` types; real FLORES-200 (997 pairs); chrF++ via `sacrebleu` |
+| **博弈力** | 6 attacks → 6 named defenses → **Yuma simulator proves 100% → 42% knockout** |
 
-Plus: **38/38 unit tests pass · git-clean repo · whitepaper-grade docs**.
+Plus: **65/65 tests pass (57 pytest + 8 Foundry) · live deploy · whitepaper-grade docs**.
 
 ---
 
@@ -185,5 +185,5 @@ Plus: **38/38 unit tests pass · git-clean repo · whitepaper-grade docs**.
 
 **LanguageArk-CN** — endangered-Chinese-language preservation, Bittensor-native.
 
-`github.com/edwardtay/bittensor-languagearkcn`
-`bash demo.sh`
+🌐 https://language-ark-cn.lever-labs.com
+`github.com/edwardtay/bittensor-languagearkcn` · `bash demo.sh`

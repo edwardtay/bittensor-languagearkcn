@@ -307,7 +307,7 @@
 
   <h2><span class="num">6b</span>Fact-check log</h2>
   <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
-    <p style="margin-top:0">Pass on 2026-05-21 15:49 UTC. Corrections vs the previous /notes build:</p>
+    <p style="margin-top:0">Pass on 2026-05-21 16:50 UTC. Corrections vs the previous /notes build:</p>
     <ul style="margin:8px 0 0;padding-left:22px">
       <li>Test counts: <strong>57 pytest + 8 forge = 65</strong> (was 55+8 = 63 before two Claude-miner tests landed).</li>
       <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
@@ -354,12 +354,11 @@ These are real engineering gaps. A grant-funded continuation would close them.
 
 In priority order, with rough effort estimates:
 
-1. **Real Whisper-Hokkien miner** (1 day): wire `seamless-m4t-v2-large` + load Common Voice nan-tw audio. Show real WER deltas across model sizes.
-2. **Local subtensor + real registration** (2 days): `docker run subtensor/subtensor:latest --chain dev`, register on a local testnet, run miner+validator extrinsics for real.
-3. **Speaker DAO contract** (1 day): minimal Solidity using Subtensor EVM precompiles; replace JSON shim.
-4. **Real GLM-4.6 evaluation pipeline** (4 hours): swap `MockGLMClient` for actual API calls, evaluate against held-out FLORES yue_Hant. Get sponsor-quality BLEU numbers.
-5. **Glicko-2 calibration** (4 hours): currently we use defaults; measure against a real annotated dataset.
-6. **Recruit 5 actual Hokkien speakers** (~weeks of outreach to orgs listed in `partners.md`) — sign LOIs, run a tiny live trial.
+1. **Real Whisper / SeamlessM4T-v2 miner end-to-end** (1 day): `seamless_miner.py` is wired; remaining work is loading Common Voice `nan-tw` audio at scale and measuring per-checkpoint WER on a held-out split.
+2. **Local subtensor + real registration** (2 days): `docker run subtensor/subtensor:latest --chain dev`, register on testnet, run real miner+validator extrinsics. The btcli sheet is already in `subnet_register.py`.
+3. **Speaker DAO contract → mainnet** (1 day): contract + tests already exist (`contracts/`); remaining work is swapping native-ETH stake for the Subtensor EVM staking precompile.
+4. **Glicko-2 calibration** (4 hours): currently defaults; measure against real annotated dataset.
+5. **Recruit 5 actual Hokkien speakers** (~weeks of outreach to orgs in `partners.md`) — sign LOIs, run a tiny live trial.
 
 ## Why this is still a winning ideathon submission
 
@@ -381,7 +380,7 @@ This document exists so judges who do a code-review don&#x27;t catch us pretendi
 </main>
 
 <footer>
-  Generated 2026-05-21 15:49 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
+  Generated 2026-05-21 16:50 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
 </footer>
 </body>
 </html>
