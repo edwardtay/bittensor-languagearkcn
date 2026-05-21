@@ -18,6 +18,7 @@ Sponsors: Zhipu (GLM-4.6) · Alibaba Cloud.
 | 🔬 What's real vs. toy | [`HONESTY.md`](HONESTY.md) |
 | 🛠 How it would actually operate | [`OPS.md`](OPS.md) — runbooks, cost model, incidents |
 | 🤝 Diaspora partner orgs | [`partners.md`](partners.md) |
+| 📧 LOI templates + status tracker | [`OUTREACH.md`](OUTREACH.md) |
 | 🧪 Run the demo locally | `bash demo.sh` (2.3 s, no keys) |
 | ⚔️ The attack-defense proof | `python -m languageark.attack` (100 % vs 42 % knockout) |
 | ⛓ Solidity Speaker DAO | `cd contracts && forge test` (8 passing) |

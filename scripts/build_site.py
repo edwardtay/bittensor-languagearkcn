@@ -302,7 +302,7 @@ TEMPLATE = """<!doctype html>
     <ul style="margin:6px 0 18px;padding-left:20px;color:var(--fg-2)">
       <li><strong>Recurring buyers.</strong> Mozilla Common Voice, the State Language Commission's 5-year plan line item for 数字化方言, UNESCO endangered-language grants, and the Chinese-language-AI teams at iFlytek / Baidu / Alibaba all already pay for this data — just inefficiently and to different vendors.</li>
       <li><strong>Diaspora willingness-to-pay.</strong> 50 M Hokkien speakers globally (Fujian, Taiwan, SG, MY, PH, ID). Heritage-language apps (HiNative, Drops, Tandem) want conversation models. Direct revenue, not grants.</li>
-      <li><strong>Policy tailwind.</strong> "数字化方言" appears explicitly in the 14th Five-Year Plan. There is a budget owner.</li>
+      <li><strong>Policy tailwind.</strong> Cultural-heritage digitisation is named in the 14th Five-Year Plan (2021-2025) Chapter 33 / Section 2 on 中华优秀传统文化. The State Language Commission's <em>语言资源保护工程</em> (Chinese Language Resources Protection Project, launched 2015 by MOE) is the existing programme-of-record for dialect preservation — there is a budget owner with a multi-year history. Specific line-item RMB figures should be sourced before any sales call.</li>
     </ul>
 
     <h3 style="margin:18px 0 6px;font-size:15px">Unit economics — back-of-the-envelope</h3>
@@ -311,8 +311,8 @@ TEMPLATE = """<!doctype html>
       <thead><tr><th>Lever</th><th>Conservative</th><th>Reasoning</th></tr></thead>
       <tbody>
         <tr><td class="who">Mozilla Common Voice</td><td>Volunteer-driven (no per-clip payouts)</td><td>Common Voice contributors are unpaid. <em>Adjacent</em> programs (Mozilla Foundation grants, MLCommons People's Speech) do fund corpus collection. Numbers vary; cite when pitching.</td></tr>
-        <tr><td class="who">国家语委 dialect digitization</td><td>Multi-million-RMB / multi-year line items in 14th & 15th Five-Year Plans</td><td>Exact figures are buried in provincial budgets — directionally large but should be sourced before any sales call.</td></tr>
-        <tr><td class="who">Commercial speech-data vendors</td><td>Reference: Beike / Magic Data / Speechocean charge $0.30–$2 per validated audio minute for Chinese</td><td>This is the price band our subnet's incentives need to clear. Public price sheets from Magic Data and similar vendors; Hokkien is typically a "rare language" surcharge tier.</td></tr>
+        <tr><td class="who">国家语委 dialect digitization</td><td>语言资源保护工程 (MOE, since 2015) — multi-year programme of record</td><td>Provincial sub-budgets are public but fragmented; need a domestic intro to pull a defensible RMB figure before a sales conversation. Marked as <strong>source-pending</strong> in any pitch quote.</td></tr>
+        <tr><td class="who">Commercial speech-data vendors</td><td>Public price-sheet band: roughly $0.30–$2 / validated audio-minute for Chinese, with low-resource-language premiums on top</td><td>Source: Magic Data and similar vendor catalogues (publicly listed; specific URLs change). This is the band our subnet's incentives need to clear — explicitly the comparable, not a claim about our own price.</td></tr>
         <tr><td class="who">Subnet TAO emissions</td><td>Set by Bittensor's emission curve — share depends on root-network weight</td><td>Pre-revenue bootstrap. We deliberately don't quote a $/day until a netuid is registered and root weight is observed — would be a fabricated number.</td></tr>
       </tbody>
     </table>

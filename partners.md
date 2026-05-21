@@ -44,7 +44,7 @@ The hackathon pitch claims real recruitment intent, so this list is grounded in 
 
 Ranked by likelihood of yielding a signable LOI within 30 days of pitch.
 
-1. **Mozilla Common Voice** (highest) — already pays $X/validated-clip; our subnet *is* a validated-clip factory
+1. **Mozilla Common Voice** (highest) — volunteer-validation pipeline; we plug in as a *high-throughput, paid* lane that submits in their existing format. Adjacent funder: Mozilla Foundation Technology Fund (has funded corpus-collection grants historically).
 2. **iFlytek 科大讯飞** — has a Hokkien speech-AI product in development (2024 announcement); buys training data
 3. **Penang state gov.** — Penang Hokkien is officially endangered; small but symbolic procurement
 4. **UNESCO Atlas of Endangered Languages** — grant program, slow but reputational

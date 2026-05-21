@@ -215,7 +215,7 @@ The 18% owner cut funds:
 
 | Judging axis | Our answer |
 |---|---|
-| **产品力 (product)** | Concrete buyer list with budget lines; underserved $XXM market |
+| **产品力 (product)** | Six buyer categories with existing budget lines (Mozilla Foundation grants, 14th FYP cultural-heritage line items, UNESCO endangered-language program, iFlytek/Baidu/Ali speech-data procurement, diaspora-app revenue) |
 | **组织力 (organization)** | Native-speaker DAOs solve the global-coordination problem; explicit grant-bootstrapping plan |
 | **验证力 (verification)** | 3 independent signals — Elo + BLEU + FLORES — automatable in code (this repo) |
 | **博弈力 (game-theory)** | Commit-reveal + κ=0.6 + tight α + min-weight-spread + proof-of-training; each defends a known attack with a specific hyperparam |
