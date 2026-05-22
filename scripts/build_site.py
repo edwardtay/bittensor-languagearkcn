@@ -849,6 +849,7 @@ PRODUCT = r"""<!doctype html>
       <a href="#/attack"   data-route="attack"><span class="ico">⚔</span> Attack simulator</a>
       <a href="#/scorer"   data-route="scorer"><span class="ico">𝐀</span> Score a translation</a>
       <a href="#/buyers"   data-route="buyers"><span class="ico">$</span> Buyers</a>
+      <a href="#/stats"    data-route="stats"><span class="ico">📊</span> Data &amp; stats</a>
       <a href="#/lineage"  data-route="lineage"><span class="ico">⌥</span> Subnet lineage</a>
       <div class="sec-label">Reference</div>
       <a href="/whitepaper/"><span class="ico">📄</span> Whitepaper</a>
@@ -1051,6 +1052,194 @@ PRODUCT = r"""<!doctype html>
         </div>
       </section>
 
+      <!-- ── DATA & STATS ── -->
+      <section class="route" id="route-stats">
+        <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Data &amp; stats</h1>
+        <p class="lede" style="font-size:15px">Three charts that pin down what the subnet's three claims actually mean numerically — pulled from real runs of <code>validator.py</code> and <code>attack.py</code> in this repo. Every number is reproducible: re-run <code>bash demo.sh</code> and read the same outputs.</p>
+
+        <h2 class="section">① Composite-score discrimination (验证力)</h2>
+        <div class="card">
+          <p class="help" style="margin:0 0 4px"><strong>Three miners, three quality tiers, three independent signals — stacked.</strong> Each bar = composite weight share. Each colour band = one signal's contribution (0.4·Elo + 0.3·BLEU_bt + 0.3·FLORES). Source: <code>python -m languageark.validator --eval-set hokkien</code>.</p>
+          <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composite score by miner, stacked by signal" style="width:100%;height:auto;font-family:'Inter',sans-serif;font-size:11px">
+            <!-- axes -->
+            <line x1="60" y1="20" x2="60" y2="200" stroke="#cbd5e1"/>
+            <line x1="60" y1="200" x2="700" y2="200" stroke="#cbd5e1"/>
+            <!-- y ticks: 0, 0.2, 0.4, 0.6, 0.8, 1.0  → 200..20 -->
+            <g fill="#94a3b8" text-anchor="end">
+              <text x="55" y="204">0</text>
+              <text x="55" y="168">0.2</text>
+              <text x="55" y="132">0.4</text>
+              <text x="55" y="96">0.6</text>
+              <text x="55" y="60">0.8</text>
+              <text x="55" y="24">1.0</text>
+            </g>
+            <g stroke="#e5e7eb" stroke-dasharray="2 3">
+              <line x1="60" y1="168" x2="700" y2="168"/>
+              <line x1="60" y1="132" x2="700" y2="132"/>
+              <line x1="60" y1="96"  x2="700" y2="96"/>
+              <line x1="60" y1="60"  x2="700" y2="60"/>
+              <line x1="60" y1="24"  x2="700" y2="24"/>
+            </g>
+            <!-- bars: x at 140,340,540 (200px spacing); width 110.
+                 composite A=0.861, B=0.514, C=0.400. y scale: pixels = 180*v, top = 200 - 180*v.
+                 stack: bottom Elo (0.4*norm), middle BLEU (0.3*bt), top FLORES (0.3*chrF).
+                 A:  Elo 0.260   BLEU 0.300   FLORES 0.300  → heights 46.8/54/54
+                 B:  Elo 0.196   BLEU 0.300   FLORES 0.018  → heights 35.3/54/3.4
+                 C:  Elo 0.136   BLEU 0.262   FLORES 0.000  → heights 24.5/47.2/0 -->
+            <!-- Miner A -->
+            <g>
+              <rect x="140" y="153.2" width="110" height="46.8" fill="#7c3aed"/>
+              <rect x="140" y="99.2"  width="110" height="54"   fill="#a78bfa"/>
+              <rect x="140" y="45.2"  width="110" height="54"   fill="#67e8f9"/>
+              <text x="195" y="42" text-anchor="middle" font-weight="700" fill="#0f172a" font-size="13">0.861</text>
+              <text x="195" y="218" text-anchor="middle" fill="#475569">Miner A · professional</text>
+            </g>
+            <!-- Miner B -->
+            <g>
+              <rect x="340" y="164.7" width="110" height="35.3" fill="#7c3aed"/>
+              <rect x="340" y="110.7" width="110" height="54"   fill="#a78bfa"/>
+              <rect x="340" y="107.3" width="110" height="3.4"  fill="#67e8f9"/>
+              <text x="395" y="104" text-anchor="middle" font-weight="700" fill="#0f172a" font-size="13">0.514</text>
+              <text x="395" y="218" text-anchor="middle" fill="#475569">Miner B · competent</text>
+            </g>
+            <!-- Miner C -->
+            <g>
+              <rect x="540" y="175.5" width="110" height="24.5" fill="#7c3aed"/>
+              <rect x="540" y="128.3" width="110" height="47.2" fill="#a78bfa"/>
+              <text x="595" y="124" text-anchor="middle" font-weight="700" fill="#0f172a" font-size="13">0.400</text>
+              <text x="595" y="218" text-anchor="middle" fill="#475569">Miner C · poor</text>
+            </g>
+            <!-- legend -->
+            <g font-size="11">
+              <rect x="60"  y="228" width="10" height="10" fill="#7c3aed"/>
+              <text x="75"  y="237" fill="#475569">0.4 · Elo (speaker DAO)</text>
+              <rect x="240" y="228" width="10" height="10" fill="#a78bfa"/>
+              <text x="255" y="237" fill="#475569">0.3 · BLEU_bt (LLM judge)</text>
+              <rect x="430" y="228" width="10" height="10" fill="#67e8f9"/>
+              <text x="445" y="237" fill="#475569">0.3 · FLORES chrF++</text>
+            </g>
+          </svg>
+          <p class="help" style="margin:8px 0 0"><strong>Read:</strong> Miner A wins on all three signals — large bar, all bands present. Miner B has near-perfect BLEU (gold round-trip) but ~zero FLORES → the third signal flags the miner is memorising back-translation, not <em>translating</em>. C fails on Elo + FLORES; the signals don't all see the same things, which is exactly the anti-collusion property we wanted.</p>
+        </div>
+
+        <h2 class="section">② Commit-reveal knockout (博弈力)</h2>
+        <div class="card">
+          <p class="help" style="margin:0 0 4px"><strong>Weight-copying freeloader's per-tempo vTrust over 12 epochs.</strong> Same adversary, two networks. Source: <code>python -m languageark.attack</code>.</p>
+          <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Freeloader vTrust over 12 tempos, with and without commit-reveal" style="width:100%;height:auto;font-family:'Inter',sans-serif;font-size:11px">
+            <line x1="60" y1="20" x2="60" y2="200" stroke="#cbd5e1"/>
+            <line x1="60" y1="200" x2="700" y2="200" stroke="#cbd5e1"/>
+            <g fill="#94a3b8" text-anchor="end">
+              <text x="55" y="204">0%</text>
+              <text x="55" y="159">25%</text>
+              <text x="55" y="114">50%</text>
+              <text x="55" y="69">75%</text>
+              <text x="55" y="24">100%</text>
+            </g>
+            <g stroke="#e5e7eb" stroke-dasharray="2 3">
+              <line x1="60" y1="159" x2="700" y2="159"/>
+              <line x1="60" y1="114" x2="700" y2="114"/>
+              <line x1="60" y1="69"  x2="700" y2="69"/>
+              <line x1="60" y1="24"  x2="700" y2="24"/>
+            </g>
+            <!-- x: tempos 1..12 across 60..700 (640px wide → 53.3 per step) -->
+            <g fill="#94a3b8" text-anchor="middle">
+              <text x="60"  y="218">1</text>
+              <text x="113" y="218">2</text>
+              <text x="167" y="218">3</text>
+              <text x="220" y="218">4</text>
+              <text x="273" y="218">5</text>
+              <text x="327" y="218">6</text>
+              <text x="380" y="218">7</text>
+              <text x="433" y="218">8</text>
+              <text x="487" y="218">9</text>
+              <text x="540" y="218">10</text>
+              <text x="593" y="218">11</text>
+              <text x="647" y="218">12</text>
+              <text x="380" y="234" font-size="12" fill="#475569">tempo (~72 min each)</text>
+            </g>
+            <!-- Network A (vulnerable, commit_reveal = 0): freeloader at 100% throughout -->
+            <polyline fill="none" stroke="#b91c1c" stroke-width="2.5"
+              points="60,24 113,24 167,24 220,24 273,24 327,24 380,24 433,24 487,24 540,24 593,24 647,24"/>
+            <!-- Network B (commit_reveal = 5): per-tempo vTrust series from attack.py:
+                 0.46 0.46 0.46 0.46 0.46 0.29 0.69 0.21 0.42 0.41 0.33 0.42
+                 y = 200 - 180*v -->
+            <polyline fill="none" stroke="#15803d" stroke-width="2.5"
+              points="60,117 113,117 167,117 220,117 273,117 327,148 380,76 433,162 487,124 540,126 593,141 647,124"/>
+            <!-- mean line for B at 0.421 -->
+            <line x1="60" y1="124.2" x2="700" y2="124.2" stroke="#15803d" stroke-dasharray="4 4" opacity="0.5"/>
+            <text x="650" y="120" fill="#15803d" text-anchor="end" font-weight="600">mean 42%</text>
+            <!-- labels -->
+            <text x="650" y="20" fill="#b91c1c" text-anchor="end" font-weight="600">Network A · commit_reveal = 0</text>
+            <text x="60"  y="14" fill="#475569" font-size="10">freeloader vTrust →</text>
+          </svg>
+          <p class="help" style="margin:8px 0 0"><strong>Read:</strong> Without commit-reveal, the parasite reads honest validators' weights in real time and copies — flat at 100 % vTrust. Turn commit-reveal on with <code>period = 5</code>: every weight the parasite can see is now stale by ~6 hours, and miner quality has drifted in the meantime, so its copied vector is wrong. Mean drops to ~42 %. <strong>One hyperparameter, 58-point swing.</strong></p>
+        </div>
+
+        <h2 class="section">③ The Sinitic-language data gap (产品力)</h2>
+        <div class="card">
+          <p class="help" style="margin:0 0 4px"><strong>Open-corpus validated audio hours, log scale.</strong> Why "no Hokkien data" is overstated but "not enough Hokkien data" is the market opportunity. Sources: Common Voice corpus stats + TAT-ASR card + FormoSpeech HF + back-of-envelope for SG/MY/PH diaspora (≈ 0).</p>
+          <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Validated open-corpus hours by Sinitic variety" style="width:100%;height:auto;font-family:'Inter',sans-serif;font-size:11px">
+            <line x1="180" y1="20" x2="180" y2="200" stroke="#cbd5e1"/>
+            <!-- log scale 1..100000; pixels-per-decade = (700-180)/5 = 104 -->
+            <g fill="#94a3b8" text-anchor="middle">
+              <text x="180" y="216">1 h</text>
+              <text x="284" y="216">10 h</text>
+              <text x="388" y="216">100 h</text>
+              <text x="492" y="216">1 k</text>
+              <text x="596" y="216">10 k</text>
+              <text x="700" y="216">100 k h</text>
+            </g>
+            <g stroke="#e5e7eb" stroke-dasharray="2 3">
+              <line x1="284" y1="20" x2="284" y2="200"/>
+              <line x1="388" y1="20" x2="388" y2="200"/>
+              <line x1="492" y1="20" x2="492" y2="200"/>
+              <line x1="596" y1="20" x2="596" y2="200"/>
+              <line x1="700" y1="20" x2="700" y2="200"/>
+            </g>
+            <!-- bars: y stride 26. log(x) * 104 + 180 -->
+            <!-- Mandarin (zh-CN) common voice ≈ 1300h validated → log10(1300)*104 = 322 ≈ pixel 502 (relative to 180+322) -->
+            <g>
+              <text x="170" y="42" text-anchor="end" fill="#0f172a" font-weight="600">Mandarin (zh-CN)</text>
+              <rect x="180" y="32" width="142" height="16" fill="#7c3aed"/>
+              <text x="328" y="44" fill="#475569">~1,400 h (Common Voice zh-CN)</text>
+            </g>
+            <g>
+              <text x="170" y="68" text-anchor="end" fill="#0f172a" font-weight="600">Hokkien — Taiwanese</text>
+              <rect x="180" y="58" width="84" height="16" fill="#7c3aed"/>
+              <text x="270" y="70" fill="#475569">~700 h (TAT-ASR, gated)</text>
+            </g>
+            <g>
+              <text x="170" y="94" text-anchor="end" fill="#0f172a" font-weight="600">Cantonese (yue)</text>
+              <rect x="180" y="84" width="78" height="16" fill="#a78bfa"/>
+              <text x="264" y="96" fill="#475569">~200 h (Common Voice yue + HK academic)</text>
+            </g>
+            <g>
+              <text x="170" y="120" text-anchor="end" fill="#0f172a" font-weight="600">Hokkien — CV nan-tw</text>
+              <rect x="180" y="110" width="42" height="16" fill="#a78bfa"/>
+              <text x="228" y="122" fill="#475569">~15 h validated (Mozilla Common Voice nan-tw)</text>
+            </g>
+            <g>
+              <text x="170" y="146" text-anchor="end" fill="#0f172a" font-weight="600">Hakka (hak)</text>
+              <rect x="180" y="136" width="32" height="16" fill="#a78bfa"/>
+              <text x="218" y="148" fill="#475569">~3 h validated (Common Voice hak-tw)</text>
+            </g>
+            <g>
+              <text x="170" y="172" text-anchor="end" fill="#0f172a" font-weight="600">Hokkien — diaspora</text>
+              <rect x="180" y="162" width="6" height="16" fill="#b91c1c"/>
+              <text x="192" y="174" fill="#b91c1c" font-weight="600">≈ 0 hours · Penang / SG / MY / PH unmapped</text>
+            </g>
+            <g>
+              <text x="170" y="198" text-anchor="end" fill="#0f172a" font-weight="600">Wu / Xiang / Gan</text>
+              <rect x="180" y="188" width="4" height="16" fill="#b91c1c"/>
+              <text x="190" y="200" fill="#b91c1c" font-weight="600">≈ 0 hours validated open corpus</text>
+            </g>
+          </svg>
+          <p class="help" style="margin:8px 0 0"><strong>Read:</strong> Mandarin and Taiwanese Hokkien (TAT) are in roughly the same order of magnitude. Cantonese and the rest are 2-3 orders of magnitude smaller — and diaspora Hokkien, Wu, Xiang have effectively <em>no open corpus at all</em>. Closing those red bars is the v1 → v2 product roadmap.</p>
+        </div>
+
+        <p class="help" style="margin-top:16px"><em>All three charts are static SVG generated from real validator / attack-sim output (no JS library). Charts are reproducible — re-run <code>bash demo.sh</code> and the numbers match.</em></p>
+      </section>
+
       <!-- ── LINEAGE ── -->
       <section class="route" id="route-lineage">
         <h1 class="hero" style="font-size:24px;letter-spacing:-.02em">Subnet lineage</h1>
@@ -1083,7 +1272,7 @@ PRODUCT = r"""<!doctype html>
 <script>
   // ── routing ──────────────────────────────────────────────────
   const routes = ["home","rubric","mechanism","attack","scorer","buyers","lineage"];
-  const labels = {home:"Overview",rubric:"Ideathon rubric",mechanism:"Mechanism",attack:"Attack simulator",scorer:"Score a translation",buyers:"Buyers",lineage:"Subnet lineage"};
+  const labels = {home:"Overview",rubric:"Ideathon rubric",mechanism:"Mechanism",attack:"Attack simulator",scorer:"Score a translation",buyers:"Buyers",stats:"Data & stats",lineage:"Subnet lineage"};
   function go(r){
     if(!routes.includes(r)) r = "home";
     document.querySelectorAll(".route").forEach(s=>s.classList.toggle("is-active",s.id==="route-"+r));
