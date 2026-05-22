@@ -418,9 +418,15 @@ TEMPLATE = """<!doctype html>
     <p style="margin-top:0;color:var(--fg-2)">The most-confusing part of any Bittensor subnet is "where does the money actually go?". Here is the full path, with a worked Hokkien example. Numbers are illustrative; the code in <code>scoring.py</code> + <code>elo.py</code> + <code>validator.py</code> implements every step.</p>
 
     <ol style="margin:10px 0 0;padding-left:22px;color:var(--fg-2);line-height:1.75">
-      <li><strong>Source sentence.</strong> The validator picks a Hokkien sentence from the rotating eval set, e.g. <code style="font-size:13.5px">你食飽未?</code> ("Have you eaten yet?").</li>
+      <li><strong>Source sentence.</strong> The validator picks a Hokkien greeting from the rotating eval set. The same sentence shows up in <em>three different surfaces</em> — and that triple is part of why this subnet exists:
+        <ul style="margin:4px 0 0;padding-left:18px;line-height:1.6">
+          <li><strong>Spoken</strong> (Penang / SG-MY diaspora style): &nbsp;<em>lu jiak pa bui?</em></li>
+          <li><strong>POJ romanization</strong> (academic): &nbsp;<em>lí chia̍h pá bōe?</em></li>
+          <li><strong>Han characters</strong> (written): &nbsp;<code style="font-size:13.5px">你食飽未?</code></li>
+        </ul>
+        Gloss: "Have you eaten yet?" — the canonical Hokkien greeting. The miner has to handle any of these surface forms; that ambiguity is exactly why Han-only models fail at Hokkien.</li>
 
-      <li><strong>Miners translate.</strong> Three miners return Mandarin candidates:
+      <li><strong>Miners translate to Mandarin.</strong> Three miners return Mandarin candidates:
         <ul style="margin:4px 0 0;padding-left:18px;line-height:1.6">
           <li>Miner A → <code style="font-size:13.5px">你吃饱了吗?</code> &nbsp;(perfect)</li>
           <li>Miner B → <code style="font-size:13.5px">你吃了吗?</code> &nbsp;("did you eat" — close but missing 饱)</li>
