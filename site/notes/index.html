@@ -235,6 +235,7 @@
     <a href="#sec-0f"><span class="num">0f</span>Sources &amp; refs</a>
     <a href="#sec-0d"><span class="num">0d</span>Demo in 7 lines</a>
     <a href="#sec-0e"><span class="num">0e</span>Judging axes</a>
+    <a href="#sec-0g"><span class="num">0g</span>Vote → weight flow</a>
     <a href="#sec-0"><span class="num">0</span>Business case</a>
     <a href="#sec-1"><span class="num">1</span>By the numbers</a>
     <a href="#sec-2"><span class="num">2</span>Real vs toy</a>
@@ -374,6 +375,68 @@
         <tr><td class="who"><strong>博弈力</strong> (game-theory)</td><td>What stops adversaries from gaming you?</td><td>Six named attacks → six named defences → a working Yuma simulator that proves the headline defence cuts a freeloader from 100 % to 42 % of dividends.</td></tr>
       </tbody>
     </table></div>
+  </div></div>
+
+  <h2 id="sec-0g"><span class="num">0g</span>ELI5 — how a speaker's vote becomes an on-chain weight</h2>
+  <div class="card"><div class="card-body">
+    <p style="margin-top:0;color:var(--fg-2)">The most-confusing part of any Bittensor subnet is "where does the money actually go?". Here is the full path, with a worked Hokkien example. Numbers are illustrative; the code in <code>scoring.py</code> + <code>elo.py</code> + <code>validator.py</code> implements every step.</p>
+
+    <ol style="margin:10px 0 0;padding-left:22px;color:var(--fg-2);line-height:1.75">
+      <li><strong>Source sentence.</strong> The validator picks a Hokkien sentence from the rotating eval set, e.g. <code style="font-size:13.5px">你食飽未?</code> ("Have you eaten yet?").</li>
+
+      <li><strong>Miners translate.</strong> Three miners return Mandarin candidates:
+        <ul style="margin:4px 0 0;padding-left:18px;line-height:1.6">
+          <li>Miner A → <code style="font-size:13.5px">你吃饱了吗?</code> &nbsp;(perfect)</li>
+          <li>Miner B → <code style="font-size:13.5px">你吃了吗?</code> &nbsp;("did you eat" — close but missing 饱)</li>
+          <li>Miner C → <code style="font-size:13.5px">吃饱</code> &nbsp;("eat full" — fragment)</li>
+        </ul>
+      </li>
+
+      <li><strong>Native speaker votes — pairwise.</strong> A stake-bonded speaker in the per-language DAO is shown two candidates side-by-side (A vs B, A vs C, B vs C) and clicks the better one. She never grades on a 1–10 scale — too noisy. Pairwise gives clean win/loss/draw data.</li>
+
+      <li><strong>Glicko-2 updates the speaker-Elo ratings.</strong> Same algorithm chess uses, with uncertainty + activity decay. After ten pairwise rounds:
+        <ul style="margin:4px 0 0;padding-left:18px;line-height:1.6;font-family:'JetBrains Mono',monospace;font-size:13px">
+          <li>Miner A: 1500 → <strong>1751</strong></li>
+          <li>Miner B: 1500 → 1481</li>
+          <li>Miner C: 1500 → 1243</li>
+        </ul>
+        These ratings get written <strong>on-chain</strong> by the Solidity Speaker DAO contract (<code>setRating(uid, elo)</code>). Validators read them back later via <code>getRating(uid)</code> — not from a JSON file we control.
+      </li>
+
+      <li><strong>Validator computes the two automatable signals.</strong> No human in the loop here:
+        <ul style="margin:4px 0 0;padding-left:18px;line-height:1.6">
+          <li><strong>BLEU back-translation:</strong> ask the LLM judge (GLM-4.6 / Qwen / Kimi / DeepSeek / Claude — whichever is available) to translate the miner's Mandarin back into Hokkien. If the round-trip preserves meaning, the miner was good. → A: 1.00, B: 1.00, C: 0.88.</li>
+          <li><strong>FLORES-200 chrF++:</strong> score the miner's Mandarin against the gold professional translation for that sentence. → A: 1.00, B: 0.06, C: 0.00.</li>
+        </ul>
+      </li>
+
+      <li><strong>Composite score per miner.</strong> Hardcoded weights in <code>scoring.py</code>:
+        <pre style="font-size:12.5px;padding:10px 14px;margin:8px 0">composite = 0.4·Elo_normalized
+            + 0.3·BLEU_back_translation
+            + 0.3·FLORES_chrF++
+
+A: 0.4·0.65 + 0.3·1.00 + 0.3·1.00 = 0.861
+B: 0.4·0.49 + 0.3·1.00 + 0.3·0.06 = 0.514
+C: 0.4·0.34 + 0.3·0.88 + 0.3·0.00 = 0.400</pre>
+        Three independent signals — collusion needs to corrupt all three at once.
+      </li>
+
+      <li><strong>Validator builds the weight vector.</strong> Composites get normalised so they sum to 1.0, giving each miner a share of the upcoming emission:
+        <ul style="margin:4px 0 0;padding-left:18px;line-height:1.6;font-family:'JetBrains Mono',monospace;font-size:13px">
+          <li>A: W = 0.485 &nbsp;←&nbsp; biggest slice of next-tempo TAO</li>
+          <li>B: W = 0.290</li>
+          <li>C: W = 0.226</li>
+        </ul>
+      </li>
+
+      <li><strong>Commit-reveal.</strong> The validator does NOT publish the weight vector immediately — that would let a freeloader copy it and earn the same dividend. Instead it publishes <code>SHA-256(weights ‖ salt)</code> now, and reveals the actual weights 5 tempos (≈ 6 h) later. By the time a copycat sees them, the eval set has rotated and the signal is stale. (This is the <strong>100 % → 42 %</strong> knockout in the attack simulator.)</li>
+
+      <li><strong>Yuma consensus on-chain.</strong> Every validator submits their own weight vector. The Bittensor chain combines them with a robust-median style algorithm (<strong>κ-clipping</strong>, κ=0.6), throwing out outliers — so any single rogue validator can be ignored. The chain mints fresh TAO every tempo and distributes it to miners in proportion to the consensus weights.</li>
+
+      <li><strong>Money flows.</strong> Miner A walks away with ~48 % of this tempo's emission; B with ~29 %; C with ~23 %. The speaker DAO members get a separate fee for their voting work (slashed if they vote against the cluster repeatedly — Sybil defence). Buyers (Mozilla / 国家语委 / iFlytek) read the on-chain weights to pick which miner's corpora to buy.</li>
+    </ol>
+
+    <p style="margin:18px 0 0;color:var(--fg-2);font-size:13.5px"><strong>The one sentence summary.</strong> Native speakers vote pairwise → Glicko-2 turns those votes into per-miner ratings → ratings are written on-chain by the Speaker DAO contract → validators read the ratings + run two automated signals → combine into a composite weight per miner → submit to chain via commit-reveal → Yuma resolves consensus → TAO is minted proportionally. Three independent signals + stake-bonded speakers + commit-reveal mean no single actor can game the payout.</p>
   </div></div>
 
   <h2 id="sec-0"><span class="num">0</span>Business case — why this gets bought</h2>
@@ -626,7 +689,7 @@ btcli sudo set --network finney --netuid &lt;NETUID&gt; \
 
   <h2 id="sec-6b"><span class="num">6b</span>Fact-check log</h2>
   <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
-    <p style="margin-top:0">Pass on 2026-05-22 07:25 UTC. Corrections vs the previous /notes build:</p>
+    <p style="margin-top:0">Pass on 2026-05-22 07:43 UTC. Corrections vs the previous /notes build:</p>
     <ul style="margin:8px 0 0;padding-left:22px">
       <li>Test counts: <strong>68 pytest + 8 forge = 76</strong> (the 6-judge wiring added 5 new factory + override + OpenAI-compat round-trip tests).</li>
       <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
@@ -732,7 +795,7 @@ This document exists so judges who do a code-review don&#x27;t catch us pretendi
 </main>
 
 <footer>
-  Generated 2026-05-22 07:25 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
+  Generated 2026-05-22 07:43 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
 </footer>
 </body>
 </html>
