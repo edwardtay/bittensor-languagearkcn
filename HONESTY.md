@@ -10,7 +10,7 @@ A submission like this is easy to oversell. This page is the unvarnished status.
 - **chrF++ and WER are real metrics.** From `sacrebleu`, the same package WMT uses.
 - **Glicko-2 is a real implementation.** Full Illinois-algorithm volatility update; tested for monotonicity, draws, and inactivity decay.
 - **Attack simulator behaves like real Yuma.** Power-law miner weights + drift-aware vTrust computation. 100% (vulnerable) vs 42% (with commit-reveal) is reproducible.
-- **57 Python tests + 8 Solidity tests (65 total) all pass.** Speaker DAO contract added 8 forge tests; AnthropicJudge + miner wrappers added pytest cases.
+- **63 Python tests + 8 Solidity tests (71 total) all pass.** Six LLM judges wired (GLM-4.6 · Qwen · Kimi · DeepSeek · Claude Code (Max sub) · Claude API) + mock fallback.
 
 ## What's a TOY ⚠️
 

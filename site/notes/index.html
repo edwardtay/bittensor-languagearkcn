@@ -229,7 +229,8 @@
       <dt style="font-weight:600">Liquid α</dt><dd style="margin:0;color:var(--fg-2)">How fast validator bonds adjust. Tight bounds (0.05–0.35) prevent whipsaw between tempos.</dd>
       <dt style="font-weight:600">btcli</dt><dd style="margin:0;color:var(--fg-2)">The Bittensor command-line tool. Our <code>subnet_register.py</code> prints the exact <code>btcli</code> sequence that would register this subnet on mainnet. → <a href="https://github.com/opentensor/btcli" target="_blank" rel="noopener">btcli repo</a></dd>
       <dt style="font-weight:600">Subtensor EVM</dt><dd style="margin:0;color:var(--fg-2)">The Solidity-compatible side of Bittensor. Lets us deploy the Speaker DAO contract on-chain. We test it on local <code>anvil</code>; the same bytecode would run on Subtensor EVM. → <a href="https://book.getfoundry.sh/" target="_blank" rel="noopener">Foundry book</a></dd>
-      <dt style="font-weight:600">Mock-GLM / mock miner</dt><dd style="margin:0;color:var(--fg-2)">Deterministic heuristic stand-ins so the demo runs offline in 2.3 s. Real LLM judge + real Whisper / SeamlessM4T are wired and gate on an env var. → <a href="https://open.bigmodel.cn/dev/api" target="_blank" rel="noopener">Zhipu GLM API</a> · <a href="https://docs.anthropic.com/" target="_blank" rel="noopener">Anthropic API</a></dd>
+      <dt style="font-weight:600">LLM judges (six backends)</dt><dd style="margin:0;color:var(--fg-2)">The back-translation BLEU step needs an LLM. We auto-select from <strong>six backends</strong>, biased toward Chinese-native models since Hokkien is Sinitic and two sponsors are Chinese: <a href="https://open.bigmodel.cn/dev/api" target="_blank" rel="noopener">Zhipu GLM-4.6</a> · <a href="https://help.aliyun.com/zh/model-studio/" target="_blank" rel="noopener">Alibaba Qwen</a> · <a href="https://platform.moonshot.cn/" target="_blank" rel="noopener">Kimi (Moonshot)</a> · <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener">DeepSeek</a> · Claude Code (local CLI, drives a Max subscription with no per-token cost) · <a href="https://docs.anthropic.com/" target="_blank" rel="noopener">Anthropic Claude API</a>. Force a specific one with <code>LANGUAGEARK_JUDGE=zhipu|qwen|kimi|deepseek|claude-code|anthropic|mock</code>.</dd>
+      <dt style="font-weight:600">Mock-GLM / mock miner</dt><dd style="margin:0;color:var(--fg-2)">Deterministic heuristic stand-ins so the demo runs offline in 1.8 s. Real LLM judge + real Whisper / SeamlessM4T are wired and gate on an env var.</dd>
     </dl>
   </div></div>
 
@@ -392,7 +393,155 @@
   </div></div>
 
   <h2><span class="num">3</span>Proof — demo.sh end-to-end run</h2>
-  <div class="card"><div class="card-head"><h3>bash demo.sh</h3><span class="sub">Runs in &lt;5 s, no API key required · with <code>ANTHROPIC_API_KEY</code> set, steps ❹/❺ use real Claude</span></div><div class="card-body"><pre></pre></div></div>
+  <div class="card"><div class="card-head"><h3>bash demo.sh</h3><span class="sub">Runs in &lt;5 s, no API key required · with <code>ANTHROPIC_API_KEY</code> set, steps ❹/❺ use real Claude</span></div><div class="card-body"><pre>
+════════════════════════════════════════════════════════════════
+ LanguageArk-CN — Hokkien (Min Nan) demo
+ Proof of Intelligence ideathon, Shanghai · May 23 2026
+════════════════════════════════════════════════════════════════
+
+❶  问题: 中国 130+ 种濒危方言, 零条 Bittensor 子网
+    Even FLORES-200 (Meta&#x27;s 200-language benchmark) has NO Hokkien.
+    That gap is exactly the market this subnet fills.
+
+❷  REAL bittensor SDK integration (not pydantic stubs)
+
+📦 HokkienMT Synapse (subclasses bt.Synapse v10.3.2)
+   .name           = HokkienMT
+   .text           = &#x27;你食飽未?&#x27;
+   .src_lang       = nan
+   .tgt_lang       = zh-Hans
+   .translation    = &#x27;&#x27;  (filled by miner)
+
+   is bt.Synapse?  True
+   is HokkienASR?  False
+
+   serializable JSON shape (subset of bt.Synapse fields):
+
+❸  Bootstrap native-speaker DAO (2-of-3 attestation, 100 TAO stake)
+  ✓ registered speaker sp_xiamen_01 (lang=nan, stake=100 TAO, attesters=3)
+  ✓ registered speaker sp_taiwan_02 (lang=nan, stake=100 TAO, attesters=3)
+  ✓ registered speaker sp_penang_03 (lang=nan, stake=100 TAO, attesters=3)
+  ✓ seeded 3 pairwise comparison votes
+  ✓ DAO saved → data/speaker_dao.json
+
+
+❹  Score 3 miners on curated Hokkien eval set (10 pairs)
+
+🎯 LanguageArk-CN validator
+   eval set : curated Hokkien (n=10, no FLORES coverage)
+   metric   : chrF++ (modern MT eval)
+   back-trans: mock-heuristic (offline fallback)
+   dao      : json @ data/speaker_dao.json
+   lang     : nan
+
+  scoring miner uid=0…
+  scoring miner uid=1…
+  scoring miner uid=2…
+
+📊 Score breakdown:
+
+ uid      Elo   EloN   BT chrF   chrF++  composite       W
+   0     1751   0.65     1.000    1.000      0.861   0.441
+   1     1481   0.49     1.000    0.423      0.622   0.319
+   2     1243   0.34     0.900    0.197      0.467   0.240
+
+📐 chrF++ vs WER for uid=2 (poor miner) sanity:
+   src=你食飽未?               chrF++=0.196  WER=0.500
+   src=今仔日真好天。             chrF++=0.169  WER=0.571
+   src=我欲轉去厝。              chrF++=0.233  WER=0.400
+
+🔐 commit_reveal: submit now, reveal in 5 tempos
+   commit_hash = 0x2d5ecdcd3a0db7516d3781a2f3a7e8ce…
+   (chain wiring: bt.subtensor().commit_weights(netuid, weights, salt=&#x27;demo-nonce-deadbeef&#x27;))
+
+❺  Score on REAL FLORES-200 yue_Hant↔zho_Hans (Cantonese family proxy)
+
+🎯 LanguageArk-CN validator
+   eval set : FLORES-200 yue_Hant↔zho_Hans (n=20, real)
+   metric   : chrF++ (modern MT eval)
+   back-trans: mock-heuristic (offline fallback)
+   dao      : json @ data/speaker_dao.json
+   lang     : yue
+
+  scoring miner uid=0…
+  scoring miner uid=1…
+  scoring miner uid=2…
+
+📊 Score breakdown:
+
+ uid      Elo   EloN   BT chrF   chrF++  composite       W
+   0     1500   0.50     1.000    1.000      0.800   0.400
+   1     1500   0.50     1.000    0.514      0.654   0.327
+   2     1500   0.50     1.000    0.147      0.544   0.272
+
+📐 chrF++ vs WER for uid=2 (poor miner) sanity:
+   src=週一，來自史丹福大學醫學院的科學家宣  chrF++=0.222  WER=0.388
+   src=主席研究員說，這可能會讓低收入國家的  chrF++=0.136  WER=0.548
+   src=當地時間上午九時半左右（世界協調時間  chrF++=0.180  WER=0.418
+
+🔐 commit_reveal: submit now, reveal in 5 tempos
+   commit_hash = 0xe16d763772a5595a1b50aa709f7ef231…
+   (chain wiring: bt.subtensor().commit_weights(netuid, weights, salt=&#x27;demo-nonce-deadbeef&#x27;))
+
+❻  博弈力: weight-copy attack vs commit-reveal defense
+
+── Network A (vulnerable) (commit_reveal_period = 0 tempos) ──
+  freeloader-validator mean vTrust over 12 tempos: 1.000
+  per-tempo: 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00 1.00
+  → freeloader earns ~100% of honest dividends WITHOUT DOING ANY WORK
+
+── Network B (LanguageArk-CN) (commit_reveal_period = 5 tempos) ──
+  freeloader-validator mean vTrust over 12 tempos: 0.421
+  per-tempo: 0.46 0.46 0.46 0.46 0.46 0.29 0.69 0.21 0.42 0.41 0.33 0.42
+  → freeloader earns only ~42% of honest dividends — attack defeated
+
+─────────────────────────────────────────────────────────────────────
+verdict: with commit_reveal_period = 5, the freeloader sees only
+weights that are 5 tempos (~6 hours) stale. Honest validators have
+already shifted to scoring fresh miner outputs (miner quality drifts
+every ~3 tempos in this sim). The freeloader&#x27;s stale copy is wrong.
+
+This is why LanguageArk-CN sets commit_reveal_period = 5.
+─────────────────────────────────────────────────────────────────────
+
+
+❼  Mainnet registration command sheet (we know the chain interface)
+
+═══════════════════════════════════════════════════════════════════════
+  LanguageArk-CN — mainnet registration command sheet
+  Network: finney      Wallet: languageark      Hotkey: owner
+═══════════════════════════════════════════════════════════════════════
+
+⚠️  Subnet creation currently burns ~3,000+ TAO. Confirm live cost first:
+   btcli subnet list --network finney
+
+──────────────────────────────────────────────────────────────────────
+STEP 1 — Create the subnet
+──────────────────────────────────────────────────────────────────────
+btcli subnet create \
+    --network finney \
+    --wallet.name languageark \
+    --wallet.hotkey owner
+
+# Output: NETUID=&lt;new&gt;. Note this number.
+
+──────────────────────────────────────────────────────────────────────
+STEP 2 — Set our chosen hyperparameters
+──────────────────────────────────────────────────────────────────────
+btcli sudo set --network finney --netuid &lt;NETUID&gt; \
+    --param tempo --value 360    # blocks (~72 min per epoch)
+btcli sudo set --network finney --netuid &lt;NETUID&gt; \
+   [... full sheet via: python -m languageark.subnet_register ...]
+
+❽  Buyers (产品力):
+      • Mozilla Common Voice           — pays for validated dataset contributions
+      • 国家语言文字工作委员会          — 数字化方言 budget line
+      • UNESCO                         — endangered-language preservation grants
+      • iFlytek / Baidu / Alibaba      — speech-AI training data procurement
+      • Diaspora apps                  — HiNative, Drops, Tandem
+
+  ✔ end of demo — 谢谢
+</pre></div></div>
 
   <h2><span class="num">4</span>Proof — Speaker DAO deployed on a real EVM chain</h2>
   <div class="card"><div class="card-head"><h3>python scripts/deploy_speaker_dao_local.py</h3><span class="sub">Solidity contract <code>contracts/src/SpeakerDAO.sol</code> · each step is a real on-chain tx</span></div><div class="card-body"><pre></pre></div></div>
@@ -408,7 +557,7 @@
 
   <h2><span class="num">6b</span>Fact-check log</h2>
   <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
-    <p style="margin-top:0">Pass on 2026-05-22 05:18 UTC. Corrections vs the previous /notes build:</p>
+    <p style="margin-top:0">Pass on 2026-05-22 06:36 UTC. Corrections vs the previous /notes build:</p>
     <ul style="margin:8px 0 0;padding-left:22px">
       <li>Test counts: <strong>57 pytest + 8 forge = 65</strong> (was 55+8 = 63 before two Claude-miner tests landed).</li>
       <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
@@ -434,7 +583,7 @@ A submission like this is easy to oversell. This page is the unvarnished status.
 - **chrF++ and WER are real metrics.** From `sacrebleu`, the same package WMT uses.
 - **Glicko-2 is a real implementation.** Full Illinois-algorithm volatility update; tested for monotonicity, draws, and inactivity decay.
 - **Attack simulator behaves like real Yuma.** Power-law miner weights + drift-aware vTrust computation. 100% (vulnerable) vs 42% (with commit-reveal) is reproducible.
-- **57 Python tests + 8 Solidity tests (65 total) all pass.** Speaker DAO contract added 8 forge tests; AnthropicJudge + miner wrappers added pytest cases.
+- **63 Python tests + 8 Solidity tests (71 total) all pass.** Six LLM judges wired (GLM-4.6 · Qwen · Kimi · DeepSeek · Claude Code (Max sub) · Claude API) + mock fallback.
 
 ## What&#x27;s a TOY ⚠️
 
@@ -481,7 +630,7 @@ This document exists so judges who do a code-review don&#x27;t catch us pretendi
 </main>
 
 <footer>
-  Generated 2026-05-22 05:18 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
+  Generated 2026-05-22 06:36 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
 </footer>
 </body>
 </html>

@@ -67,6 +67,7 @@ def test_validator_loads_real_miner_outputs(monkeypatch, tmp_path):
     try:
         # Stub the GLM/judge call to avoid network
         class _Judge:
+            label = "stub-judge"
             async def translate(self, text, src_lang, tgt_lang):
                 from languageark.glm_client import TranslationResult
                 return TranslationResult(src=src_lang, tgt=tgt_lang,

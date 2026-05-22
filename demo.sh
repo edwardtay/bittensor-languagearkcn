@@ -11,6 +11,13 @@ if [[ -d .venv ]]; then
     export PATH="$ROOT/.venv/bin:$PATH"
 fi
 
+# Demo guarantee: 2.3s offline. If the operator hasn't picked a real judge
+# via an API key or explicit override, force the mock so we don't spawn the
+# claude CLI 60× during the scoring loops.
+if [[ -z "${LANGUAGEARK_JUDGE:-}${ZHIPU_API_KEY:-}${DASHSCOPE_API_KEY:-}${MOONSHOT_API_KEY:-}${DEEPSEEK_API_KEY:-}${ANTHROPIC_API_KEY:-}" ]]; then
+    export LANGUAGEARK_JUDGE=mock
+fi
+
 echo
 echo "════════════════════════════════════════════════════════════════"
 echo " LanguageArk-CN — Hokkien (Min Nan) demo"

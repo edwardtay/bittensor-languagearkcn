@@ -52,8 +52,10 @@ GPU sizing: SeamlessM4T-v2-large = **9.5 GB VRAM** (fits on a single RTX 3090 / 
 |---|---:|---:|---:|
 | Registration burn (amortized 12 mo) | 1 | 3,000 TAO / 12 | ~250 TAO |
 | Cloud VM (4 vCPU, 16 GB) | 720 h | $0.10 | **$72** |
-| Anthropic Claude judge (sonnet-4.6, ~30k calls × 1k tok) | 30k | $0.003/1k | **$90** |
-| Or: Zhipu GLM-4.6 (sponsor credits at event) | 30k | 0 | **$0** |
+| LLM judge — pick one: Zhipu GLM-4.6 (sponsor credits at event) | 30k | 0 | **$0** |
+| or Qwen-max / Kimi / DeepSeek (Chinese API, similar pricing) | 30k | ~$0.002/1k | ~**$60** |
+| or Claude Code via Max subscription (~$200/mo flat) | 30k | flat | **$0 marginal** |
+| or Anthropic Claude API (haiku-4.5, fallback) | 30k | $0.001/1k | ~**$30** |
 | Egress (chain RPC, ~5 GB) | 5 GB | $0.09 | **$0.50** |
 | **Total cash** (excluding TAO opportunity cost) | | | **~$160 / mo** |
 

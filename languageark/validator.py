@@ -26,7 +26,7 @@ from .eval_samples import (
     generate_miner_outputs,
     hokkien_eval_set,
 )
-from .glm_client import GLMClient, MockGLMClient, long_name, make_glm
+from .glm_client import Judge, long_name, make_glm
 from .metrics import chrf_plus_plus, wer
 from .scoring import composite_score, normalize_weight_vector
 from .speaker_dao import SpeakerDAO
@@ -36,7 +36,7 @@ async def score_one_miner(
     miner_uid: int,
     miner_outputs: dict[str, str],
     samples: list[EvalSample],
-    glm: GLMClient | MockGLMClient,
+    glm: Judge,
     dao: SpeakerDAO,
     lang: str = "nan",
 ) -> dict[str, float]:
@@ -138,9 +138,9 @@ async def main_async(
                 click.echo(f"   + loaded REAL miner uid={uid} from {real_path} "
                            f"({len(preds)} predictions)")
 
-    # 3. GLM client (real if ZHIPU_API_KEY present, else heuristic mock)
+    # 3. LLM judge — picks best available (Chinese models first, then Claude, then mock)
     glm = make_glm()
-    glm_kind = "GLM-4.6 (live)" if isinstance(glm, GLMClient) else "mock-heuristic (offline)"
+    glm_kind = glm.label
 
     dao = _make_dao(dao_backend, dao_path, dao_rpc, dao_contract)
     dao_label = (

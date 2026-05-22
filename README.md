@@ -40,8 +40,10 @@ pytest -q           # 57 passed
 **Mechanism.** 3-signal composite score, each signal independent — collusion needs to corrupt all three:
 
 ```
-score = 0.4·Elo(speaker-DAO, Glicko-2) + 0.3·BLEU_bt(GLM-4.6 / Claude) + 0.3·FLORES-200
+score = 0.4·Elo(speaker-DAO, Glicko-2) + 0.3·BLEU_bt(LLM judge) + 0.3·FLORES-200
 ```
+
+LLM judge auto-selects from 6 backends (Chinese sponsors first): **GLM-4.6 (Zhipu)** · **Qwen (Alibaba)** · **Kimi (Moonshot)** · **DeepSeek** · **Claude Code via Max sub** · **Claude API** · heuristic mock fallback. Force one with `LANGUAGEARK_JUDGE=zhipu|qwen|kimi|deepseek|claude-code|anthropic|mock`.
 
 **Proof — live scoring** (from `bash demo.sh`):
 
@@ -113,6 +115,6 @@ docker-compose.yml   site + (stub) subtensor + miner + validator
 
 ## Demo notes
 
-`bash demo.sh` runs in **~2.3s** with no API keys. The `bittensor` SDK (v10.3.2) is imported (`bt.Synapse` subclasses real, `chain.py` reads live finney when networked). No chain node, no GPU. Judge tier auto-selects: `ANTHROPIC_API_KEY` → Claude · `ZHIPU_API_KEY` → GLM-4.6 · neither → heuristic mock. At the event, `export ZHIPU_API_KEY=…` to swap to GLM (sponsor optics).
+`bash demo.sh` runs in **~1.8s** with no API keys. The `bittensor` SDK (v10.3.2) is imported (`bt.Synapse` subclasses real, `chain.py` reads live finney when networked). No chain node, no GPU. Judge auto-selects from 6 backends in priority order — Chinese sponsor models first (Zhipu → Alibaba → Moonshot → DeepSeek), then Claude Code (local Max-sub CLI), then Claude API, then mock. At the event, `export ZHIPU_API_KEY=…` to swap to GLM-4.6 (sponsor optics).
 
 MIT licensed.
