@@ -213,13 +213,16 @@
         </div>
 
         <h2 class="section">What's real</h2>
-        <div class="grid">
-          <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
-          <div class="card"><div class="ico">🧪</div><h3>6 LLM judges wired</h3><p>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</p></div>
-          <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
-          <div class="card"><div class="ico">🌐</div><h3>SOTA many-to-many MT wired</h3><p>Miner wrappers for <strong>NLLB-200</strong> and <strong>SeamlessM4T-v2</strong> (Meta's 200-lang text MT + speech). Plus <strong>FLORES+</strong> (2024, OpenLanguageData) as the active eval benchmark.</p></div>
-          <div class="card"><div class="ico">🏯</div><h3>Sponsor stack, end-to-end</h3><p><strong>Alibaba</strong>: CosyVoice (TTS) · SenseVoice (ASR — covers nan/yue/hak/wu in one model) · Qwen2-Audio (multimodal) · Qwen-max (judge). <strong>Zhipu</strong>: GLM-4.6 (judge) · GLM-4-Voice (speech LLM). One sponsor product per layer.</p></div>
-        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th style="width:24%">Item</th><th>What's actually shipped</th></tr></thead>
+          <tbody>
+            <tr><td class="who">Mechanism in code</td><td>Real <code>bt.Synapse</code> types (v10.3.2) · real Glicko-2 · real FLORES-200 · real Yuma-style attack sim · real Solidity Speaker DAO.</td></tr>
+            <tr><td class="who">6 LLM judges wired</td><td>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</td></tr>
+            <tr><td class="who">On-chain DAO</td><td>Solidity contract deployed &amp; exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</td></tr>
+            <tr><td class="who">SOTA many-to-many MT</td><td>Miner wrappers for <strong>NLLB-200</strong> and <strong>SeamlessM4T-v2</strong> (Meta's 200-lang text + speech). <strong>FLORES+</strong> (2024, OpenLanguageData) as active eval benchmark.</td></tr>
+            <tr><td class="who">Sponsor stack, end-to-end</td><td><strong>Alibaba</strong>: CosyVoice (TTS) · SenseVoice (ASR — covers nan/yue/hak/wu) · Qwen2-Audio (multimodal) · Qwen-max (judge). <strong>Zhipu</strong>: GLM-4.6 (judge) · GLM-4-Voice (speech LLM). One sponsor product per layer.</td></tr>
+          </tbody>
+        </table></div>
       </section>
 
       <!-- ── RUBRIC ── -->
@@ -271,14 +274,17 @@
         </div>
 
         <h2 class="section">Anti-gaming primitives</h2>
-        <div class="grid">
-          <div class="card"><div class="ico">🪪</div><h3>2-of-3 DAO attestation</h3><p>Speakers stake 100 TAO + need 2 attestations to register. Solidity contract, on-chain, slashable.</p></div>
-          <div class="card"><div class="ico">🔐</div><h3>Commit-reveal weights</h3><p><code>commit_reveal_period = 5</code> tempos. See the <a href="#/attack">Attack simulator →</a></p></div>
-          <div class="card"><div class="ico">⚖</div><h3>κ-clipping</h3><p><code>kappa = 0.6</code>. Cabal needs &gt;60% stake to move consensus.</p></div>
-          <div class="card"><div class="ico">🧬</div><h3>Min weight spread</h3><p><code>min_allowed_weights = 16</code> kills single-miner cabal payouts.</p></div>
-          <div class="card"><div class="ico">⚓</div><h3>Tight liquid-α</h3><p><code>α∈[0.05,0.35]</code> prevents bond whipsaw.</p></div>
-          <div class="card"><div class="ico">🧾</div><h3>Proof-of-training</h3><p>Miners commit <code>(loss_curve_hash, dataset_hash)</code> before serving. Detects model copying.</p></div>
-        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th style="width:22%">Attack</th><th style="width:22%">Defence</th><th style="width:24%">Hyperparam</th><th>Why it works</th></tr></thead>
+          <tbody>
+            <tr><td class="who">Sybil speakers</td><td>2-of-3 DAO attestation + stake</td><td>100 TAO stake; on-chain Solidity, slashable</td><td>Costs more to fake an attestation than the payout for one Sybil vote.</td></tr>
+            <tr><td class="who">Weight copying</td><td>Commit-reveal</td><td><code>commit_reveal_period = 5</code> tempos (~6 h)</td><td>By the time a copycat sees revealed weights, the eval set has rotated. See <a href="#/attack">attack sim →</a></td></tr>
+            <tr><td class="who">Validator cabal</td><td>κ-clipping</td><td><code>kappa = 0.6</code> (default 0.5)</td><td>Cabal needs &gt;60 % of total stake to move consensus weights.</td></tr>
+            <tr><td class="who">Single-miner cabal</td><td>Min weight spread</td><td><code>min_allowed_weights = 16</code></td><td>Each validator must distribute weight to ≥16 miners — no winner-take-all payouts.</td></tr>
+            <tr><td class="who">Bond whipsaw</td><td>Tight liquid-α</td><td><code>α ∈ [0.05, 0.35]</code></td><td>Bonds can't swing faster than reality — small adversaries can't pump-and-dump.</td></tr>
+            <tr><td class="who">Model copying</td><td>Proof-of-training</td><td>on-chain <code>(loss_curve_hash, dataset_hash)</code></td><td>Same model from two different "trainings" gets the same hash → caught.</td></tr>
+          </tbody>
+        </table></div>
       </section>
 
       <!-- ── ATTACK SIMULATOR ── -->
@@ -580,11 +586,14 @@
         </div>
 
         <h2 class="section">Genuinely new (the 创意 part)</h2>
-        <div class="grid">
-          <div class="card"><div class="ico">🪪</div><h3>Stake-bonded speaker DAO</h3><p>No existing subnet has an on-chain stake-and-attestation registry for human evaluators. Our Solidity contract is the org / anti-Sybil novelty.</p></div>
-          <div class="card"><div class="ico">🧮</div><h3>3-signal composite</h3><p>SN37 uses single-signal eval; SN1 uses single-signal LLM judge. We compose Elo + back-translation + held-out FLORES so fooling two requires fooling the third independently.</p></div>
-          <div class="card"><div class="ico">🧩</div><h3>Cross-script Hokkien framing</h3><p>SeamlessM4T-v2 has no <code>__nan__</code>; FLORES has only Latin-script <code>nan_Latn</code>. Building a real Han-script Hokkien corpus IS the deliverable.</p></div>
-        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th style="width:28%">Novelty</th><th>What none of the priors do</th></tr></thead>
+          <tbody>
+            <tr><td class="who">Stake-bonded speaker DAO</td><td>No existing subnet has an on-chain stake + attestation registry for human evaluators. Our Solidity contract is the org / anti-Sybil novelty.</td></tr>
+            <tr><td class="who">3-signal composite</td><td>SN37 uses single-signal eval; SN1 uses single-signal LLM judge. We compose Elo + back-translation + held-out FLORES — fooling two requires fooling the third independently.</td></tr>
+            <tr><td class="who">Cross-script Hokkien framing</td><td>SeamlessM4T-v2 has no <code>__nan__</code>; FLORES has only Latin-script <code>nan_Latn</code>. Building a real Han-script Hokkien corpus IS the deliverable.</td></tr>
+          </tbody>
+        </table></div>
       </section>
 
     </div>
@@ -615,7 +624,7 @@
 
   // build time
   const bt = document.getElementById("build-ts");
-  if(bt) bt.textContent = "2026-05-22 09:27 UTC";
+  if(bt) bt.textContent = "2026-05-22 12:02 UTC";
 
   // ── attack simulator ────────────────────────────────────────
   function simAttack(crPeriod, drift){
