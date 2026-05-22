@@ -169,7 +169,7 @@
       <a class="chip" href="/" style="text-decoration:none">← Home</a>
       <a class="chip" href="/whitepaper/" style="text-decoration:none">Whitepaper</a>
       <a class="chip" href="/slides.html" style="text-decoration:none">Slides</a>
-      <span class="chip good"><span class="dot"></span>65 / 65 tests</span>
+      <span class="chip good"><span class="dot"></span>71 / 71 tests</span>
     </div>
   </div>
 </div>
@@ -213,6 +213,7 @@
       <dt style="font-weight:600">Subnet</dt><dd style="margin:0;color:var(--fg-2)">A self-contained market on Bittensor: miners do work, validators grade it, the chain mints tokens (TAO) and splits them by grade. → <a href="https://docs.learnbittensor.org/" target="_blank" rel="noopener">docs</a></dd>
       <dt style="font-weight:600">TAO</dt><dd style="margin:0;color:var(--fg-2)">The Bittensor token. Both the unit of payment and the unit of stake (skin-in-the-game).</dd>
       <dt style="font-weight:600">Miner</dt><dd style="margin:0;color:var(--fg-2)">Anyone running an AI model that serves requests. In our subnet: someone running a Hokkien speech-to-text or translation model.</dd>
+      <dt style="font-weight:600">ASR / TTS / MT</dt><dd style="margin:0;color:var(--fg-2)">The three miner job types. <strong>ASR</strong> = Automatic Speech Recognition (audio → text — Hokkien clip → Han characters). <strong>TTS</strong> = Text-to-Speech (text → audio — Mandarin sentence → spoken Hokkien). <strong>MT</strong> = Machine Translation (text → text — Hokkien → English). All three are first-class <code>bt.Synapse</code> types in our protocol.</dd>
       <dt style="font-weight:600">Validator</dt><dd style="margin:0;color:var(--fg-2)">Anyone running scoring code. They quiz miners, grade outputs, submit weights to the chain. Stake gets slashed if they cheat.</dd>
       <dt style="font-weight:600">Yuma consensus</dt><dd style="margin:0;color:var(--fg-2)">Bittensor's algorithm for combining many validators' weights into one truth-of-the-network, while penalising outliers. Like a robust median, on-chain. → <a href="https://docs.learnbittensor.org/learn/yuma-consensus" target="_blank" rel="noopener">Yuma docs</a></dd>
       <dt style="font-weight:600">Tempo</dt><dd style="margin:0;color:var(--fg-2)">One scoring round. 360 blocks ≈ 72 minutes on Bittensor's mainnet.</dd>
@@ -354,7 +355,7 @@
   <div class="grid">
     <div class="stat">
       <div class="label">Tests</div>
-      <div class="val">65<small>/ 65 passing</small></div>
+      <div class="val">71<small>/ 71 passing</small></div>
       <div class="help">57 Python (pytest) + 8 Solidity (forge). 1 skip is an opt-in 9 GB SeamlessM4T download.</div>
     </div>
     <div class="stat">
@@ -557,9 +558,9 @@ btcli sudo set --network finney --netuid &lt;NETUID&gt; \
 
   <h2><span class="num">6b</span>Fact-check log</h2>
   <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
-    <p style="margin-top:0">Pass on 2026-05-22 06:36 UTC. Corrections vs the previous /notes build:</p>
+    <p style="margin-top:0">Pass on 2026-05-22 06:43 UTC. Corrections vs the previous /notes build:</p>
     <ul style="margin:8px 0 0;padding-left:22px">
-      <li>Test counts: <strong>57 pytest + 8 forge = 65</strong> (was 55+8 = 63 before two Claude-miner tests landed).</li>
+      <li>Test counts: <strong>63 pytest + 8 forge = 71</strong> (the 6-judge wiring added 5 new factory + override + OpenAI-compat round-trip tests).</li>
       <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
       <li>Mozilla Common Voice "$/clip" estimates: <strong>removed</strong> — fabricated. Contributors are unpaid volunteers; only adjacent grant programs ever pay, and at variable amounts.</li>
       <li>RMB province-budget figures: hedged to "multi-million-RMB / multi-year line items" — directional, not precise.</li>
@@ -630,7 +631,7 @@ This document exists so judges who do a code-review don&#x27;t catch us pretendi
 </main>
 
 <footer>
-  Generated 2026-05-22 06:36 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
+  Generated 2026-05-22 06:43 UTC · single static page, nginx via CapRover · <a href="https://language-ark-cn.captain.lever-labs.com/">language-ark-cn.captain.lever-labs.com</a>
 </footer>
 </body>
 </html>

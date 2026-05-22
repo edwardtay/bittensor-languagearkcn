@@ -204,7 +204,7 @@ TEMPLATE = """<!doctype html>
       <a class="chip" href="/" style="text-decoration:none">← Home</a>
       <a class="chip" href="/whitepaper/" style="text-decoration:none">Whitepaper</a>
       <a class="chip" href="/slides.html" style="text-decoration:none">Slides</a>
-      <span class="chip good"><span class="dot"></span>65 / 65 tests</span>
+      <span class="chip good"><span class="dot"></span>71 / 71 tests</span>
     </div>
   </div>
 </div>
@@ -248,6 +248,7 @@ TEMPLATE = """<!doctype html>
       <dt style="font-weight:600">Subnet</dt><dd style="margin:0;color:var(--fg-2)">A self-contained market on Bittensor: miners do work, validators grade it, the chain mints tokens (TAO) and splits them by grade. → <a href="https://docs.learnbittensor.org/" target="_blank" rel="noopener">docs</a></dd>
       <dt style="font-weight:600">TAO</dt><dd style="margin:0;color:var(--fg-2)">The Bittensor token. Both the unit of payment and the unit of stake (skin-in-the-game).</dd>
       <dt style="font-weight:600">Miner</dt><dd style="margin:0;color:var(--fg-2)">Anyone running an AI model that serves requests. In our subnet: someone running a Hokkien speech-to-text or translation model.</dd>
+      <dt style="font-weight:600">ASR / TTS / MT</dt><dd style="margin:0;color:var(--fg-2)">The three miner job types. <strong>ASR</strong> = Automatic Speech Recognition (audio → text — Hokkien clip → Han characters). <strong>TTS</strong> = Text-to-Speech (text → audio — Mandarin sentence → spoken Hokkien). <strong>MT</strong> = Machine Translation (text → text — Hokkien → English). All three are first-class <code>bt.Synapse</code> types in our protocol.</dd>
       <dt style="font-weight:600">Validator</dt><dd style="margin:0;color:var(--fg-2)">Anyone running scoring code. They quiz miners, grade outputs, submit weights to the chain. Stake gets slashed if they cheat.</dd>
       <dt style="font-weight:600">Yuma consensus</dt><dd style="margin:0;color:var(--fg-2)">Bittensor's algorithm for combining many validators' weights into one truth-of-the-network, while penalising outliers. Like a robust median, on-chain. → <a href="https://docs.learnbittensor.org/learn/yuma-consensus" target="_blank" rel="noopener">Yuma docs</a></dd>
       <dt style="font-weight:600">Tempo</dt><dd style="margin:0;color:var(--fg-2)">One scoring round. 360 blocks ≈ 72 minutes on Bittensor's mainnet.</dd>
@@ -389,7 +390,7 @@ TEMPLATE = """<!doctype html>
   <div class="grid">
     <div class="stat">
       <div class="label">Tests</div>
-      <div class="val">65<small>/ 65 passing</small></div>
+      <div class="val">71<small>/ 71 passing</small></div>
       <div class="help">57 Python (pytest) + 8 Solidity (forge). 1 skip is an opt-in 9 GB SeamlessM4T download.</div>
     </div>
     <div class="stat">
@@ -446,7 +447,7 @@ TEMPLATE = """<!doctype html>
   <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
     <p style="margin-top:0">Pass on {ts}. Corrections vs the previous /notes build:</p>
     <ul style="margin:8px 0 0;padding-left:22px">
-      <li>Test counts: <strong>57 pytest + 8 forge = 65</strong> (was 55+8 = 63 before two Claude-miner tests landed).</li>
+      <li>Test counts: <strong>63 pytest + 8 forge = 71</strong> (the 6-judge wiring added 5 new factory + override + OpenAI-compat round-trip tests).</li>
       <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
       <li>Mozilla Common Voice "$/clip" estimates: <strong>removed</strong> — fabricated. Contributors are unpaid volunteers; only adjacent grant programs ever pay, and at variable amounts.</li>
       <li>RMB province-budget figures: hedged to "multi-million-RMB / multi-year line items" — directional, not precise.</li>
@@ -665,7 +666,7 @@ PRODUCT = r"""<!doctype html>
     </nav>
     <div class="live-card">
       <div class="row"><span class="lbl">Status</span><span><span class="pulse"></span> Live</span></div>
-      <div class="row" style="margin-top:4px"><span class="lbl">Tests</span><span><b>65 / 65</b></span></div>
+      <div class="row" style="margin-top:4px"><span class="lbl">Tests</span><span><b>71 / 71</b></span></div>
       <div class="row" style="margin-top:4px"><span class="lbl">Build</span><span id="build-ts" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--fg-2)"></span></div>
     </div>
   </aside>
@@ -690,7 +691,7 @@ PRODUCT = r"""<!doctype html>
 
         <h2 class="section">Status — by the numbers</h2>
         <div class="grid">
-          <div class="card stat"><div class="label">Tests</div><div class="val">65<small>/ 65 passing</small></div></div>
+          <div class="card stat"><div class="label">Tests</div><div class="val">71<small>/ 71 passing</small></div></div>
           <div class="card stat"><div class="label">FLORES-200 pairs</div><div class="val">997<small>yue↔zh</small></div></div>
           <div class="card stat"><div class="label">Commit-reveal knockout</div><div class="val">100→42%<small>vTrust</small></div></div>
           <div class="card stat"><div class="label">DAO gate</div><div class="val">2 / 3<small>on-chain</small></div></div>
@@ -699,7 +700,7 @@ PRODUCT = r"""<!doctype html>
         <h2 class="section">What's real</h2>
         <div class="grid">
           <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
-          <div class="card"><div class="ico">🧪</div><h3>Live LLM judge</h3><p>Validator calls Zhipu GLM-4.6 when <code>ZHIPU_API_KEY</code> is set; Claude Haiku 4.5 otherwise; heuristic mock as last resort.</p></div>
+          <div class="card"><div class="ico">🧪</div><h3>6 LLM judges wired</h3><p>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</p></div>
           <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
         </div>
       </section>
@@ -726,7 +727,7 @@ PRODUCT = r"""<!doctype html>
               <tr>
                 <td class="who">验证力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Verification</span></td>
                 <td>How is contributor output automatically audited via code, not opinion?</td>
-                <td>3-signal composite: Glicko-2 Elo + GLM-4.6 back-translation + held-out FLORES-200 chrF++. Try the live <a href="#/scorer">scorer widget</a>. Code: <code>scoring.py</code>, <code>metrics.py</code>; 65 tests pass.</td>
+                <td>3-signal composite: Glicko-2 Elo + LLM back-translation (6 wired backends, Chinese-first) + held-out FLORES-200 chrF++. Try the live <a href="#/scorer">scorer widget</a>. Code: <code>scoring.py</code>, <code>metrics.py</code>; 71 tests pass.</td>
               </tr>
               <tr>
                 <td class="who">博弈力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Game theory</span></td>
@@ -746,7 +747,7 @@ PRODUCT = r"""<!doctype html>
             <li><strong>15s — 组织力</strong>: open <a href="#/mechanism">Mechanism</a>, point at the DAO card. "母语者 stake 100 TAO + 2-of-3 attestation, Solidity 合约, 已部署."</li>
             <li><strong>15s — 验证力</strong>: open <a href="#/scorer">Score a translation</a>. Click the three quality tiers — show chrF++ drop from 1.00 → 0.45 → 0.10.</li>
             <li><strong>25s — 博弈力</strong>: open <a href="#/attack">Attack simulator</a>. Drag commit-reveal slider 0 → 5. "Freeloader 红条从 1.00 掉到 0.42 — 同一行代码差 58 分."</li>
-            <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 5 秒跑完, 65/65 测试通过, 已部署. 谢谢."</li>
+            <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 1.8 秒跑完, 71/71 测试通过 (含 8 个 Solidity), GLM/Qwen/Kimi/DeepSeek 4 大国产模型全部接入, 已部署. 谢谢."</li>
           </ol>
         </div>
       </section>

@@ -177,7 +177,7 @@
     </nav>
     <div class="live-card">
       <div class="row"><span class="lbl">Status</span><span><span class="pulse"></span> Live</span></div>
-      <div class="row" style="margin-top:4px"><span class="lbl">Tests</span><span><b>65 / 65</b></span></div>
+      <div class="row" style="margin-top:4px"><span class="lbl">Tests</span><span><b>71 / 71</b></span></div>
       <div class="row" style="margin-top:4px"><span class="lbl">Build</span><span id="build-ts" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--fg-2)"></span></div>
     </div>
   </aside>
@@ -202,7 +202,7 @@
 
         <h2 class="section">Status — by the numbers</h2>
         <div class="grid">
-          <div class="card stat"><div class="label">Tests</div><div class="val">65<small>/ 65 passing</small></div></div>
+          <div class="card stat"><div class="label">Tests</div><div class="val">71<small>/ 71 passing</small></div></div>
           <div class="card stat"><div class="label">FLORES-200 pairs</div><div class="val">997<small>yue↔zh</small></div></div>
           <div class="card stat"><div class="label">Commit-reveal knockout</div><div class="val">100→42%<small>vTrust</small></div></div>
           <div class="card stat"><div class="label">DAO gate</div><div class="val">2 / 3<small>on-chain</small></div></div>
@@ -211,7 +211,7 @@
         <h2 class="section">What's real</h2>
         <div class="grid">
           <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
-          <div class="card"><div class="ico">🧪</div><h3>Live LLM judge</h3><p>Validator calls Zhipu GLM-4.6 when <code>ZHIPU_API_KEY</code> is set; Claude Haiku 4.5 otherwise; heuristic mock as last resort.</p></div>
+          <div class="card"><div class="ico">🧪</div><h3>6 LLM judges wired</h3><p>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</p></div>
           <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
         </div>
       </section>
@@ -238,7 +238,7 @@
               <tr>
                 <td class="who">验证力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Verification</span></td>
                 <td>How is contributor output automatically audited via code, not opinion?</td>
-                <td>3-signal composite: Glicko-2 Elo + GLM-4.6 back-translation + held-out FLORES-200 chrF++. Try the live <a href="#/scorer">scorer widget</a>. Code: <code>scoring.py</code>, <code>metrics.py</code>; 65 tests pass.</td>
+                <td>3-signal composite: Glicko-2 Elo + LLM back-translation (6 wired backends, Chinese-first) + held-out FLORES-200 chrF++. Try the live <a href="#/scorer">scorer widget</a>. Code: <code>scoring.py</code>, <code>metrics.py</code>; 71 tests pass.</td>
               </tr>
               <tr>
                 <td class="who">博弈力<br><span style="font-weight:400;color:var(--fg-2);font-size:12.5px">Game theory</span></td>
@@ -258,7 +258,7 @@
             <li><strong>15s — 组织力</strong>: open <a href="#/mechanism">Mechanism</a>, point at the DAO card. "母语者 stake 100 TAO + 2-of-3 attestation, Solidity 合约, 已部署."</li>
             <li><strong>15s — 验证力</strong>: open <a href="#/scorer">Score a translation</a>. Click the three quality tiers — show chrF++ drop from 1.00 → 0.45 → 0.10.</li>
             <li><strong>25s — 博弈力</strong>: open <a href="#/attack">Attack simulator</a>. Drag commit-reveal slider 0 → 5. "Freeloader 红条从 1.00 掉到 0.42 — 同一行代码差 58 分."</li>
-            <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 5 秒跑完, 65/65 测试通过, 已部署. 谢谢."</li>
+            <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 1.8 秒跑完, 71/71 测试通过 (含 8 个 Solidity), GLM/Qwen/Kimi/DeepSeek 4 大国产模型全部接入, 已部署. 谢谢."</li>
           </ol>
         </div>
       </section>
@@ -433,7 +433,7 @@
 
   // build time
   const bt = document.getElementById("build-ts");
-  if(bt) bt.textContent = "2026-05-22 06:36 UTC";
+  if(bt) bt.textContent = "2026-05-22 06:43 UTC";
 
   // ── attack simulator ────────────────────────────────────────
   function simAttack(crPeriod, drift){
