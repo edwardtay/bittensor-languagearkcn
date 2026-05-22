@@ -350,13 +350,17 @@ TEMPLATE = """<!doctype html>
       <li><a href="https://github.com/macrocosm-os/apex" target="_blank" rel="noopener">macrocosm-os/apex</a> (SN1) · <a href="https://github.com/macrocosm-os/finetuning" target="_blank" rel="noopener">macrocosm-os/finetuning</a> (SN37) — reference architectures</li>
     </ul>
 
-    <h3 style="margin:0 0 6px;font-size:14px">Hokkien / Min Nan research &amp; data</h3>
+    <h3 style="margin:0 0 6px;font-size:14px">Hokkien / Min Nan — the dataset landscape (and the gap)</h3>
+    <p style="margin:0 0 10px;color:var(--fg-2);font-size:13.5px">Hokkien is not <em>literally</em> data-less — but every existing dataset is small, Taiwanese-variety-only, or uses one romanization scheme. None is anywhere near the scale or coverage that production speech-AI training needs. That gap is the market opportunity this subnet is built around.</p>
     <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
-      <li><a href="https://about.fb.com/news/2022/10/hokkien-ai-speech-translation/" target="_blank" rel="noopener">Meta SeamlessM4T Hokkien S2ST (Oct 2022)</a> — the canonical low-resource S2ST paper that picked Hokkien</li>
-      <li><a href="https://github.com/facebookresearch/fairseq/tree/ust/examples/hokkien" target="_blank" rel="noopener">facebookresearch/fairseq · hokkien_translation</a> — open HK↔EN checkpoints</li>
-      <li><a href="https://commonvoice.mozilla.org/nan-tw" target="_blank" rel="noopener">Mozilla Common Voice — nan-tw (Taiwanese Hokkien)</a> — validation-corpus seed</li>
-      <li><a href="https://huggingface.co/models?search=whisper+hokkien" target="_blank" rel="noopener">Hugging Face — Whisper Hokkien fine-tunes</a></li>
+      <li><a href="https://commonvoice.mozilla.org/nan-tw" target="_blank" rel="noopener">Mozilla Common Voice — <code>nan-tw</code></a> — the only major <em>open</em> Taiwanese-Hokkien speech corpus. As of 2026 has only a few dozen hours validated. Penang / SG / MY / PH varieties: <strong>not represented at all</strong>.</li>
+      <li><a href="https://about.fb.com/news/2022/10/hokkien-ai-speech-translation/" target="_blank" rel="noopener">Meta SeamlessM4T Hokkien S2ST (Oct 2022)</a> — Meta released parallel Hokkien↔English data alongside the model; <a href="https://github.com/facebookresearch/fairseq/tree/ust/examples/hokkien" target="_blank" rel="noopener">facebookresearch/fairseq · hokkien_translation</a> ships open HK↔EN checkpoints. Taiwanese-only, and the v2-large successor <em>dropped Hokkien support</em>.</li>
+      <li><a href="https://sites.google.com/speech.ntut.edu.tw/fsw" target="_blank" rel="noopener">TAT (Taiwanese Across Taiwan)</a> + <a href="https://huggingface.co/datasets/formospeech/tat-asr" target="_blank" rel="noopener">FormoSpeech TAT-ASR on HF</a> (gated — HF login required) — largest Taiwanese-Hokkien academic ASR corpus, ~700 hrs but mostly Taipei accent and restricted-licence for non-academic use.</li>
+      <li><a href="https://huggingface.co/datasets?search=hokkien" target="_blank" rel="noopener">Hugging Face — search "hokkien"</a> — a couple dozen community-uploaded datasets, almost all under 100 MB and inconsistent in romanization scheme (POJ vs Tâi-lô vs Han-mixed-script vs ad-hoc).</li>
+      <li><a href="https://huggingface.co/datasets/openlanguagedata/flores_plus" target="_blank" rel="noopener">FLORES+ — <code>nan_Latn</code></a> — 997 sentences in POJ-romanized Hokkien (Latin script, Taiwanese variety). FLORES has <em>no Han-character Hokkien split</em>; FLORES-200 has no Hokkien speech.</li>
+      <li><a href="https://huggingface.co/models?search=whisper+hokkien" target="_blank" rel="noopener">Hugging Face — Whisper Hokkien fine-tunes</a> — ~10 community-uploaded checkpoints. None are production-grade; all train on TAT or Common Voice nan-tw above.</li>
     </ul>
+    <p style="margin:0 0 14px;color:var(--fg-2);font-size:13.5px"><strong>What's missing:</strong> (a) <em>diaspora-variety</em> Hokkien — Penang / SG / MY / PH; (b) Han-mixed-script eval; (c) any single corpus larger than ~1000 hours; (d) cross-variety alignment (a "lu jiak pa bui" → "lí chia̍h pá bōe" → "你食飽未?" parallel). LanguageArk-CN's per-language Speaker DAO is the org structure designed to fill those four gaps in parallel, one diaspora hub at a time.</p>
 
     <h3 style="margin:0 0 6px;font-size:14px">MT &amp; speech benchmarks / metrics</h3>
     <ul style="margin:0 0 14px;padding-left:20px;color:var(--fg-2)">
@@ -596,9 +600,11 @@ C: 0.4·0.34 + 0.3·0.88 + 0.3·0.00 = 0.400</pre>
     <p style="margin:14px 0 0">What we deliberately did <em>not</em> change: the <strong>100% → 42% commit-reveal vTrust knockout</strong> (reproducible by running <code>python -m languageark.attack</code>), the <strong>50 M Hokkien-speaker</strong> figure (Wikipedia / Ethnologue consensus), the <strong>Meta SeamlessM4T-v2 lacks <code>__nan__</code></strong> finding (verified empirically against the HF tokenizer), and the <strong>997 FLORES-200 pairs</strong> count (literal <code>wc -l</code> on our local copy).</p>
   </div></div>
 
-  <h2 id="sec-op-pitch"><span class="num">op</span>Operator — 90-second judging-floor pitch script (中文)</h2>
-  <div class="card"><div class="card-body" style="padding:20px 22px">
-    <p style="margin-top:0;color:var(--fg-2)">Internal pitch flow. Lives here, not on the public site — judges don't need to read their own script.</p>
+  <h2 id="sec-op-pitch"><span class="num">op</span>Operator — 90-second judging-floor pitch script</h2>
+  <div class="card"><div class="card-body">
+    <p style="margin-top:0;color:var(--fg-2)">Internal pitch flow. Two versions — pick by which language the judge engages in first. Both reference the same on-screen artifacts in the same order.</p>
+
+    <h3 style="margin:16px 0 6px;font-size:13.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">中文 (default — Shanghai judges)</h3>
     <ol style="padding-left:22px;color:var(--fg-2);margin:0;line-height:1.85;font-size:14px">
       <li><strong>10s — 问题</strong>: "中国 130+ 种濒危方言, 零条 Bittensor 子网解决这个问题."</li>
       <li><strong>15s — 产品力</strong>: open <a href="/#/buyers">Buyers</a>. "Mozilla, 国家语委, UNESCO 都已经在花钱, 但慢而无法验证."</li>
@@ -607,6 +613,18 @@ C: 0.4·0.34 + 0.3·0.88 + 0.3·0.00 = 0.400</pre>
       <li><strong>25s — 博弈力</strong>: open <a href="/#/attack">Attack simulator</a>. Drag commit-reveal slider 0 → 5. "Freeloader 红条从 1.00 掉到 0.42 — 同一行代码差 58 分."</li>
       <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 1.8 秒跑完, 76/76 测试通过 (含 8 个 Solidity), GLM / Qwen / Kimi / DeepSeek 4 大国产模型全部接入, 已部署. 谢谢."</li>
     </ol>
+
+    <h3 style="margin:22px 0 6px;font-size:13.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">English (international judges / Bittensor China Hacker House)</h3>
+    <ol style="padding-left:22px;color:var(--fg-2);margin:0;line-height:1.85;font-size:14px">
+      <li><strong>10s — Problem</strong>: "China has 130-plus endangered Chinese-language and minority-language families. Zero of the 128 Bittensor subnets address this. The market won't fix it because nobody pays AI labs to learn dying languages."</li>
+      <li><strong>15s — 产品力 / Product</strong>: open <a href="/#/buyers">Buyers</a>. "Six buyer categories already spend real money here — Mozilla Common Voice, the State Language Commission's 数字化方言 line item, UNESCO, iFlytek, Baidu, Alibaba. They're paying inefficiently to different vendors with no verifiable quality. We turn that fragmented spend into one verifiable market."</li>
+      <li><strong>15s — 组织力 / Organization</strong>: open <a href="/#/mechanism">Mechanism</a>, point at the DAO card. "Native speakers stake 100 TAO and need two-of-three attestation to vote. That's a real Solidity contract — eight forge tests pass on local anvil. The org structure is the moat, not the model."</li>
+      <li><strong>15s — 验证力 / Verification</strong>: open <a href="/#/scorer">Score a translation</a>. Click the three quality tiers. "chrF++ drops from 1.00 to 0.45 to 0.10. Same metric WMT uses. Three independent signals — speaker Elo, LLM back-translation, and held-out FLORES — combined into one composite. Collusion would have to corrupt all three."</li>
+      <li><strong>25s — 博弈力 / Game theory</strong>: open <a href="/#/attack">Attack simulator</a>. Drag the commit-reveal slider from 0 to 5. "Without commit-reveal, a weight-copying freeloader earns 100 percent of the dividends. Turn commit-reveal on with period equals five tempos — same freeloader collapses to 42 percent. One hyperparameter, 58-point swing. We have a working Yuma-style simulator that proves this is reproducible."</li>
+      <li><strong>10s — Closing</strong>: "<code>bash demo.sh</code> runs end-to-end in 1.8 seconds. 76 tests pass — 68 Python plus 8 Solidity. All four top Chinese LLMs wired as judges — GLM, Qwen, Kimi, DeepSeek. CosyVoice and SenseVoice from Alibaba wired as default miner backends. Live deployment online. Thank you."</li>
+    </ol>
+
+    <p style="margin:18px 0 0;color:var(--muted);font-size:12.5px"><em>Tip: lead with whichever language the judge greets you in. The visual artifacts (Buyers / Mechanism / Scorer / Attack sim) are the same — only the narration changes.</em></p>
   </div></div>
 
   <h2 id="sec-7"><span class="num">7</span>Honesty page (unedited)</h2>
