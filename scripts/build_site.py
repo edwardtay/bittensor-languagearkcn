@@ -104,11 +104,12 @@ TEMPLATE = """<!doctype html>
           font-size:12.5px; line-height:1.35; padding:10px 0; }}
   .toc h4 {{ font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.08em;
              color:var(--muted); margin:0 0 6px 8px; }}
-  .toc a {{ display:block; padding:5px 8px; border-radius:6px; color:var(--fg-2);
+  .toc a {{ display:flex; align-items:baseline; gap:8px; padding:5px 8px; border-radius:6px; color:var(--fg-2);
             text-decoration:none; border-left:2px solid transparent; }}
   .toc a:hover {{ background:var(--surface-2); color:var(--fg); }}
   .toc a.active {{ background:var(--brand-50); color:var(--brand); border-left-color:var(--brand); font-weight:600; }}
-  .toc a .num {{ display:inline-block; width:22px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:500; font-size:11.5px; }}
+  .toc a .num {{ flex:0 0 26px; text-align:right; color:var(--muted);
+                font-variant-numeric:tabular-nums; font-weight:500; font-size:11.5px; }}
   .toc a.active .num {{ color:var(--brand); }}
   .notes-main h2 {{ scroll-margin-top:64px; }}
   @media (max-width:900px) {{ .shell.with-toc {{ grid-template-columns:1fr; gap:18px; }} .toc {{ position:static; max-height:none; }} }}
@@ -263,7 +264,7 @@ TEMPLATE = """<!doctype html>
 
   <aside class="toc" aria-label="Notes sections">
     <h4>On this page</h4>
-    <a href="#top"><span class="num">↑</span>Top</a>
+    <a href="#top"><span class="num">—</span>Top</a>
     <a href="#sec-0a"><span class="num">0a</span>ELI5 — what & why</a>
     <a href="#sec-0b"><span class="num">0b</span>Framing pivot</a>
     <a href="#sec-0c"><span class="num">0c</span>Jargon glossary</a>
@@ -282,7 +283,7 @@ TEMPLATE = """<!doctype html>
     <a href="#sec-6b"><span class="num">6b</span>Fact-check log</a>
     <a href="#sec-7"><span class="num">7</span>Honesty (raw)</a>
     <h4 style="margin-top:18px">Operator-only</h4>
-    <a href="#sec-op-pitch"><span class="num">📣</span>90s pitch script</a>
+    <a href="#sec-op-pitch"><span class="num">op</span>90s pitch script</a>
   </aside>
 
   <div class="notes-main">
@@ -589,7 +590,7 @@ C: 0.4·0.34 + 0.3·0.88 + 0.3·0.00 = 0.400</pre>
     <p style="margin:14px 0 0">What we deliberately did <em>not</em> change: the <strong>100% → 42% commit-reveal vTrust knockout</strong> (reproducible by running <code>python -m languageark.attack</code>), the <strong>50 M Hokkien-speaker</strong> figure (Wikipedia / Ethnologue consensus), the <strong>Meta SeamlessM4T-v2 lacks <code>__nan__</code></strong> finding (verified empirically against the HF tokenizer), and the <strong>997 FLORES-200 pairs</strong> count (literal <code>wc -l</code> on our local copy).</p>
   </div></div>
 
-  <h2 id="sec-op-pitch"><span class="num">📣</span>Operator — 90-second judging-floor pitch script (中文)</h2>
+  <h2 id="sec-op-pitch"><span class="num">op</span>Operator — 90-second judging-floor pitch script (中文)</h2>
   <div class="card"><div class="card-body" style="padding:20px 22px">
     <p style="margin-top:0;color:var(--fg-2)">Internal pitch flow. Lives here, not on the public site — judges don't need to read their own script.</p>
     <ol style="padding-left:22px;color:var(--fg-2);margin:0;line-height:1.85;font-size:14px">
