@@ -177,7 +177,7 @@ Runs in **2.3 seconds**. No API key required (Claude / GLM judges optional).
 | **验证力** | 3 independent signals; real `bt.Synapse` types; real FLORES-200 (997 pairs); chrF++ via `sacrebleu` |
 | **博弈力** | 6 attacks → 6 named defenses → **Yuma simulator proves 100% → 42% knockout** |
 
-Plus: **65/65 tests pass (57 pytest + 8 Foundry) · live deploy · whitepaper-grade docs**.
+Plus: **71/71 tests pass (63 pytest + 8 Foundry) · live deploy · whitepaper-grade docs**.
 
 ---
 

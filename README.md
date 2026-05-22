@@ -7,7 +7,7 @@ Built for **Proof of Intelligence: AI Subnet 创意黑客松** · Shanghai · 20
 Sponsors: Zhipu (GLM-4.6) · Alibaba Cloud.
 
 🌐 **Live:** https://language-ark-cn.lever-labs.com
-📊 **Tests:** 57 pytest + 8 forge = **65/65 passing** · **2.3s** end-to-end demo · zero API keys required
+📊 **Tests:** 63 pytest + 8 forge = **71/71 passing** · **~1.8s** end-to-end demo · zero API keys required
 
 ### Judge's quickstart (≤ 5 minutes)
 
@@ -96,10 +96,10 @@ languageark/
   subnet_register.py btcli mainnet command sheet
 contracts/           Foundry: SpeakerDAO.sol (stake + attest + slash + rating)
 scripts/             build_site.py, deploy_speaker_dao_local.py, validator_e2e_onchain.py
-tests/               57 pytest + 8 forge = 65 passing
+tests/               63 pytest + 8 forge = 71 passing
 slides/pitch.md      13-slide marp deck
 whitepaper.md · partners.md · OPS.md · HONESTY.md
-demo.sh              7-step demo, ~2.3s wall-clock, no API key required
+demo.sh              7-step demo, ~1.8s wall-clock, no API key required
 docker-compose.yml   site + (stub) subtensor + miner + validator
 ```
 
