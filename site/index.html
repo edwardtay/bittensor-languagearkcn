@@ -253,18 +253,6 @@
           </table>
         </div>
 
-        <h2 class="section">90-second demo script (中文)</h2>
-        <div class="widget">
-          <p class="help" style="margin-bottom:14px"><strong>Suggested judging-floor flow.</strong> Pulls from this app + <code>demo.sh</code>; survives an offline laptop via recorded screenshots.</p>
-          <ol style="padding-left:22px;color:var(--fg-2);margin:0;line-height:1.85;font-size:14px">
-            <li><strong>10s — 问题</strong>: "中国 130+ 种濒危方言, 零条 Bittensor 子网解决这个问题."</li>
-            <li><strong>15s — 产品力</strong>: open <a href="#/buyers">Buyers</a>. "Mozilla, 国家语委, UNESCO 都已经在花钱, 但慢而无法验证."</li>
-            <li><strong>15s — 组织力</strong>: open <a href="#/mechanism">Mechanism</a>, point at the DAO card. "母语者 stake 100 TAO + 2-of-3 attestation, Solidity 合约, 已部署."</li>
-            <li><strong>15s — 验证力</strong>: open <a href="#/scorer">Score a translation</a>. Click the three quality tiers — show chrF++ drop from 1.00 → 0.45 → 0.10.</li>
-            <li><strong>25s — 博弈力</strong>: open <a href="#/attack">Attack simulator</a>. Drag commit-reveal slider 0 → 5. "Freeloader 红条从 1.00 掉到 0.42 — 同一行代码差 58 分."</li>
-            <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 1.8 秒跑完, 71/71 测试通过 (含 8 个 Solidity), GLM/Qwen/Kimi/DeepSeek 4 大国产模型全部接入, 已部署. 谢谢."</li>
-          </ol>
-        </div>
       </section>
 
       <!-- ── MECHANISM ── -->
@@ -437,7 +425,7 @@
 
   // build time
   const bt = document.getElementById("build-ts");
-  if(bt) bt.textContent = "2026-05-22 07:03 UTC";
+  if(bt) bt.textContent = "2026-05-22 07:11 UTC";
 
   // ── attack simulator ────────────────────────────────────────
   function simAttack(crPeriod, drift){
