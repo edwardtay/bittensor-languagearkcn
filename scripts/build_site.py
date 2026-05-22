@@ -93,37 +93,42 @@ TEMPLATE = """<!doctype html>
 
   /* ── layout ──────────────────────────────────── */
   .shell {{ max-width:1180px; margin:0 auto; padding:32px 24px 80px; }}
-  /* ── side-nav layout (notes) ─────────────────── */
-  .shell.with-toc {{ display:grid; grid-template-columns:220px 1fr; gap:32px; align-items:start; }}
-  .toc {{ position:sticky; top:72px; max-height:calc(100vh - 90px); overflow-y:auto;
-          font-size:13px; line-height:1.4; padding:14px 6px 14px 0; }}
-  .toc h4 {{ font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.08em;
-             color:var(--muted); margin:0 0 8px 4px; }}
-  .toc a {{ display:block; padding:6px 10px; border-radius:7px; color:var(--fg-2);
+  /* ── side-nav layout (notes) — minimalist ─────── */
+  .shell.with-toc {{ display:grid; grid-template-columns:200px minmax(0, 1fr); gap:36px; align-items:start; max-width:1080px; }}
+  /* CRITICAL: min-width on grid item lets it shrink instead of forcing
+     horizontal scroll when children (pre, table, long h1) have wide content. */
+  .notes-main {{ min-width:0; }}
+  .notes-main pre, .notes-main table {{ max-width:100%; }}
+  .notes-main h1, .notes-main h2, .notes-main h3 {{ overflow-wrap:anywhere; }}
+  .toc {{ position:sticky; top:64px; max-height:calc(100vh - 80px); overflow-y:auto;
+          font-size:12.5px; line-height:1.35; padding:10px 0; }}
+  .toc h4 {{ font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.08em;
+             color:var(--muted); margin:0 0 6px 8px; }}
+  .toc a {{ display:block; padding:5px 8px; border-radius:6px; color:var(--fg-2);
             text-decoration:none; border-left:2px solid transparent; }}
   .toc a:hover {{ background:var(--surface-2); color:var(--fg); }}
   .toc a.active {{ background:var(--brand-50); color:var(--brand); border-left-color:var(--brand); font-weight:600; }}
-  .toc a .num {{ display:inline-block; width:24px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:500; }}
+  .toc a .num {{ display:inline-block; width:22px; color:var(--muted); font-variant-numeric:tabular-nums; font-weight:500; font-size:11.5px; }}
   .toc a.active .num {{ color:var(--brand); }}
-  /* anchor offset so sticky topbar doesn't cover headings */
-  .notes-main h2 {{ scroll-margin-top:72px; }}
-  @media (max-width:900px) {{ .shell.with-toc {{ grid-template-columns:1fr; }} .toc {{ position:static; max-height:none; }} }}
+  .notes-main h2 {{ scroll-margin-top:64px; }}
+  @media (max-width:900px) {{ .shell.with-toc {{ grid-template-columns:1fr; gap:18px; }} .toc {{ position:static; max-height:none; }} }}
+  /* hero — minimalist */
   .hero {{
-    background:linear-gradient(180deg,#fff 0%,#fafbfc 100%);
-    border:1px solid var(--border); border-radius:var(--radius);
-    padding:28px 28px 24px; box-shadow:var(--shadow);
-    margin-bottom:22px;
+    background:transparent; border:none; border-radius:0;
+    padding:0 0 14px; box-shadow:none; margin-bottom:18px;
+    border-bottom:1px solid var(--border);
   }}
   .hero h1 {{
-    font-size:30px; line-height:1.2; letter-spacing:-.02em;
-    margin:0 0 8px; font-weight:700;
+    font-size:24px; line-height:1.2; letter-spacing:-.02em;
+    margin:0 0 6px; font-weight:600;
   }}
-  .hero p.sub {{ color:var(--fg-2); margin:0 0 16px; max-width:780px; }}
-  .badges {{ display:flex; flex-wrap:wrap; gap:6px; }}
+  .hero p.sub {{ color:var(--fg-2); margin:0 0 12px; max-width:780px; font-size:14px; }}
+  .badges {{ display:flex; flex-wrap:wrap; gap:5px; }}
+  .badges .chip {{ font-size:11.5px; padding:3px 8px; }}
 
-  h2 {{ font-size:13px; text-transform:uppercase; letter-spacing:.08em;
-        color:var(--muted); font-weight:600; margin:36px 4px 12px; }}
-  h2 .num {{ color:var(--brand); margin-right:6px; }}
+  h2 {{ font-size:12px; text-transform:uppercase; letter-spacing:.08em;
+        color:var(--muted); font-weight:600; margin:28px 2px 10px; }}
+  h2 .num {{ color:var(--brand); margin-right:6px; font-weight:600; }}
 
   /* ── stat grid ──────────────────────────────── */
   .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }}
@@ -143,11 +148,11 @@ TEMPLATE = """<!doctype html>
     padding:6px 6px; box-shadow:var(--shadow-sm); overflow:hidden;
   }}
   .card .card-head {{
-    padding:16px 22px 0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding:12px 18px 0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
   }}
-  .card .card-head h3 {{ margin:0; font-size:16px; font-weight:600; letter-spacing:-.01em; }}
-  .card .card-head .sub {{ color:var(--fg-2); font-size:13px; }}
-  .card .card-body {{ padding:14px 22px 22px; }}
+  .card .card-head h3 {{ margin:0; font-size:14px; font-weight:600; letter-spacing:-.01em; }}
+  .card .card-head .sub {{ color:var(--fg-2); font-size:12.5px; }}
+  .card .card-body {{ padding:12px 18px 16px; font-size:13.5px; }}
 
   /* tables: scrollable on mobile + sticky first column */
   .table-wrap {{
@@ -282,16 +287,8 @@ TEMPLATE = """<!doctype html>
   <div class="notes-main">
 
   <section class="hero" id="top">
-    <h1>A Bittensor subnet for endangered Chinese languages.</h1>
-    <p class="sub">Hokkien / Min Nan v1, with the mechanism design (commit-reveal, native-speaker DAO, LLM-judged back-translation) shipped as real code — not a slide deck.</p>
-    <div class="badges">
-      <span class="chip good"><span class="dot"></span>63 Python tests pass</span>
-      <span class="chip good"><span class="dot"></span>8 Solidity tests pass</span>
-      <span class="chip good"><span class="dot"></span>Real bittensor SDK</span>
-      <span class="chip good"><span class="dot"></span>On-chain DAO (anvil)</span>
-      <span class="chip good"><span class="dot"></span>6 LLM judges wired (GLM / Qwen / Kimi / DeepSeek / Claude Code / Claude API)</span>
-      <span class="chip warn"><span class="dot"></span>Hokkien audio model is a stretch goal</span>
-    </div>
+    <h1>Engineering notes</h1>
+    <p class="sub">Hokkien / Min Nan v1 Bittensor subnet. Mechanism design shipped as real code — 68 pytest + 8 forge, 6 LLM judges, 4 sponsor-aligned miner backends.</p>
   </section>
 
   <h2 id="sec-0a"><span class="num">0a</span>ELI5 — what is this and why does it matter</h2>
