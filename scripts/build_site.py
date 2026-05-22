@@ -515,6 +515,9 @@ PRODUCT = r"""<!doctype html>
   a{color:var(--brand);text-decoration:none}
   a:hover{text-decoration:underline}
   code{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;font-size:12.5px}
+  /* jargon tooltips: hover to read definition (also see /notes glossary) */
+  abbr[title]{border-bottom:1px dotted var(--brand);cursor:help;text-decoration:none;text-decoration-skip-ink:none}
+  abbr[title]:hover{background:var(--brand-50)}
 
   /* ── app shell ── */
   .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
@@ -686,22 +689,23 @@ PRODUCT = r"""<!doctype html>
         <div class="hero">
           <span class="pill">A verifiable Chinese-language data marketplace</span>
           <h1>Endangered-language preservation, as a self-policing market.</h1>
-          <p class="lede">Miners ship ASR / TTS / MT models for Hokkien (v1 wedge), Cantonese, Tibetan, Uyghur, Wu… Validators score them with a 3-signal composite (native-speaker Elo + LLM back-translation + held-out FLORES-200) that survives weight-copying, Sybil speakers, and validator cabals. Buyers (Mozilla, 国家语委, UNESCO, iFlytek) read the on-chain weights and pay for vetted corpora.</p>
+          <p class="lede">Miners ship <abbr title="ASR = Automatic Speech Recognition (audio → text). TTS = Text-to-Speech (text → audio). MT = Machine Translation (text → text, language A → language B).">ASR / TTS / MT</abbr> models for <abbr title="Min Nan / 闽南语 / ISO 639-3 nan — Sinitic language of Fujian, Taiwan, and ~50M diaspora across SG/MY/PH/ID. Meta picked it as their canonical low-resource case (SeamlessM4T 2022).">Hokkien</abbr> (v1 wedge), Cantonese, Tibetan, Uyghur, Wu… <abbr title="Anyone running scoring code. Quizzes miners, grades outputs, submits weights to chain. Slashed if they cheat.">Validators</abbr> score them with a 3-signal composite (<abbr title="Native-speaker DAO casts pairwise votes; ratings update via Glicko-2 (chess Elo + uncertainty + activity decay).">native-speaker Elo</abbr> + <abbr title="Translate Hokkien→English with the miner, then English→Hokkien with an independent LLM. Round-trip preserves meaning ⇒ miner is good. Hard to fake.">LLM back-translation</abbr> + held-out <abbr title="Meta's gold-standard MT benchmark: 997 sentences professionally translated into 200 languages. Cantonese↔Mandarin pair shipped in this repo at data/flores/.">FLORES-200</abbr>) that survives weight-copying, <abbr title="One attacker pretending to be many speakers. Defended by 100 TAO stake + 2-of-3 attestation + geographic distribution rule.">Sybil</abbr> speakers, and validator cabals. Buyers (Mozilla, 国家语委, UNESCO, iFlytek) read the on-chain weights and pay for vetted corpora.</p>
         </div>
 
         <h2 class="section">Status — by the numbers</h2>
         <div class="grid">
           <div class="card stat"><div class="label">Tests</div><div class="val">71<small>/ 71 passing</small></div></div>
-          <div class="card stat"><div class="label">FLORES-200 pairs</div><div class="val">997<small>yue↔zh</small></div></div>
-          <div class="card stat"><div class="label">Commit-reveal knockout</div><div class="val">100→42%<small>vTrust</small></div></div>
-          <div class="card stat"><div class="label">DAO gate</div><div class="val">2 / 3<small>on-chain</small></div></div>
+          <div class="card stat"><div class="label"><abbr title="Meta's 200-language MT benchmark. 997 sentences professionally translated. Cantonese↔Mandarin pair shipped in data/flores/.">FLORES-200</abbr> pairs</div><div class="val">997<small>yue↔zh</small></div></div>
+          <div class="card stat"><div class="label"><abbr title="Validators publish a sealed hash of weights first, reveal real weights ~6 h (5 tempos) later. Stops freeloaders from copying everyone else's grades in real time.">Commit-reveal</abbr> knockout</div><div class="val">100→42%<small><abbr title="Validator Trust — Yuma score for how aligned a validator is with the consensus. Drops emission to ~0 when low.">vTrust</abbr></small></div></div>
+          <div class="card stat"><div class="label"><abbr title="Decentralised Autonomous Organisation — here, per-language committee of stake-bonded native speakers. To join: 100 TAO stake + 2-of-3 attestations.">DAO</abbr> gate</div><div class="val">2 / 3<small>on-chain</small></div></div>
         </div>
 
         <h2 class="section">What's real</h2>
         <div class="grid">
-          <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
+          <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <abbr title="Bittensor's typed RPC message between validator and miner. Our HokkienASR/HokkienMT/HokkienTTS are real bt.Synapse subclasses."><code>bt.Synapse</code></abbr> types (v10.3.2), real <abbr title="Glicko-2 — chess-style rating system with uncertainty + activity decay. Mark Glickman 2012.">Glicko-2</abbr>, real FLORES-200, real <abbr title="Bittensor's on-chain consensus that combines validator weights into one network truth while penalising outliers. Like an on-chain robust median.">Yuma</abbr>-style attack sim, real Solidity Speaker DAO.</p></div>
           <div class="card"><div class="ico">🧪</div><h3>6 LLM judges wired</h3><p>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</p></div>
           <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
+          <div class="card"><div class="ico">🌐</div><h3>SOTA many-to-many MT wired</h3><p>Miner wrappers for <strong>NLLB-200</strong> (Meta's 200-language text MT, the de-facto open standard) and <strong>SeamlessM4T-v2</strong> (text + speech, ~100 langs incl. Hokkien). UN uses human translators — these are the AI-side comparable.</p></div>
         </div>
       </section>
 
@@ -767,11 +771,11 @@ PRODUCT = r"""<!doctype html>
 
         <h2 class="section">Anti-gaming primitives</h2>
         <div class="grid">
-          <div class="card"><div class="ico">🪪</div><h3>2-of-3 DAO attestation</h3><p>Speakers stake 100 TAO + need 2 attestations to register. Solidity contract, on-chain, slashable.</p></div>
-          <div class="card"><div class="ico">🔐</div><h3>Commit-reveal weights</h3><p><code>commit_reveal_period = 5</code> tempos. See the <a href="#/attack">Attack simulator →</a></p></div>
-          <div class="card"><div class="ico">⚖</div><h3>κ-clipping</h3><p><code>kappa = 0.6</code>. Cabal needs &gt;60% stake to move consensus.</p></div>
+          <div class="card"><div class="ico">🪪</div><h3>2-of-3 DAO attestation</h3><p>Speakers stake 100 <abbr title="Bittensor's native token. Used for both payment and stake (skin-in-the-game).">TAO</abbr> + need 2 attestations to register. Solidity contract, on-chain, slashable.</p></div>
+          <div class="card"><div class="ico">🔐</div><h3>Commit-reveal weights</h3><p><code>commit_reveal_period = 5</code> <abbr title="1 tempo = 360 blocks ≈ 72 min on Bittensor mainnet. 5 tempos ≈ 6 hours.">tempos</abbr>. See the <a href="#/attack">Attack simulator →</a></p></div>
+          <div class="card"><div class="ico">⚖</div><h3><abbr title="The Yuma rule that caps how far a validator's weights can drift from the cluster median. We set κ above the default 0.5 so a cabal needs >60% stake.">κ-clipping</abbr></h3><p><code>kappa = 0.6</code>. Cabal needs &gt;60% stake to move consensus.</p></div>
           <div class="card"><div class="ico">🧬</div><h3>Min weight spread</h3><p><code>min_allowed_weights = 16</code> kills single-miner cabal payouts.</p></div>
-          <div class="card"><div class="ico">⚓</div><h3>Tight liquid-α</h3><p><code>α∈[0.05,0.35]</code> prevents bond whipsaw.</p></div>
+          <div class="card"><div class="ico">⚓</div><h3>Tight <abbr title="How fast validator bonds adjust between tempos. Tight bounds prevent whipsaw.">liquid-α</abbr></h3><p><code>α∈[0.05,0.35]</code> prevents bond whipsaw.</p></div>
           <div class="card"><div class="ico">🧾</div><h3>Proof-of-training</h3><p>Miners commit <code>(loss_curve_hash, dataset_hash)</code> before serving. Detects model copying.</p></div>
         </div>
       </section>
