@@ -198,7 +198,7 @@ TEMPLATE = """<!doctype html>
 
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none"><line x1="30" y1="7" x2="35" y2="12"/><line x1="9" y1="16" x2="55" y2="16"/><line x1="15" y1="23" x2="49" y2="23"/><line x1="15" y1="30" x2="49" y2="30"/></g><rect x="18" y="35" width="28" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="3.5"/><path d="M8 51 Q32 60 56 51 L52 55 Q32 59 12 55 Z" fill="#fff"/></svg></div>
     <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
     <div class="topbar-actions">
       <a class="chip" href="/" style="text-decoration:none">← Home</a>
@@ -645,7 +645,7 @@ PRODUCT = r"""<!doctype html>
 
   <aside id="sidebar">
     <div class="brand-row">
-      <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+      <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none"><line x1="30" y1="7" x2="35" y2="12"/><line x1="9" y1="16" x2="55" y2="16"/><line x1="15" y1="23" x2="49" y2="23"/><line x1="15" y1="30" x2="49" y2="30"/></g><rect x="18" y="35" width="28" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="3.5"/><path d="M8 51 Q32 60 56 51 L52 55 Q32 59 12 55 Z" fill="#fff"/></svg></div>
       <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
     </div>
     <nav class="side" id="sidenav">
@@ -1091,7 +1091,7 @@ def _render_markdown_page(md_path: Path, out_dir: Path, title: str, subtitle: st
 <body>
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#67e8f9"/></linearGradient></defs><g stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"><line x1="22" y1="14" x2="32" y2="10"/><line x1="18" y1="20" x2="46" y2="20"/><line x1="22" y1="28" x2="42" y2="28"/></g><rect x="22" y="33" width="20" height="9" rx="2" fill="none" stroke="#fff" stroke-width="3.4"/><path d="M8 50 Q32 62 56 50 L52 55 Q32 60 12 55 Z" fill="#fff"/></svg></div>
+    <div class="logo"><svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none"><line x1="30" y1="7" x2="35" y2="12"/><line x1="9" y1="16" x2="55" y2="16"/><line x1="15" y1="23" x2="49" y2="23"/><line x1="15" y1="30" x2="49" y2="30"/></g><rect x="18" y="35" width="28" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="3.5"/><path d="M8 51 Q32 60 56 51 L52 55 Q32 59 12 55 Z" fill="#fff"/></svg></div>
     <div class="brand">LanguageArk-CN<small>Hokkien subnet · v1</small></div>
     <nav class="nav">
       <a href="/">Home</a>
