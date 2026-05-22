@@ -94,7 +94,31 @@ Validator logs to stdout in JSON; ship via vector → Loki. One Grafana dashboar
 - Voting cadence: 20 pairs/week minimum to remain in good standing; missing 3 weeks → cooling period (no emissions credit) until catch-up.
 - Geographic distribution: target ≤ 40% from any one of {Fujian, Taiwan, SG/MY/PH/ID diaspora, NA diaspora} to defeat regional cabal.
 
-## 9. Local dev stack
+## 9. Sponsor-stack deployment (Alibaba Cloud + Zhipu)
+
+Why deploy on sponsor infrastructure: the ideathon backers (Zhipu, Alibaba Cloud) give credits, and every layer of our stack already has a sponsor-aligned default. Concrete plan:
+
+| Layer | Sponsor product | Why |
+|---|---|---|
+| Miner GPU (TTS/ASR/MT inference) | **Alibaba Cloud PAI** (Platform for AI) or **ECS GPU spot** (V100 / A10G / A100) | CosyVoice (TTS) + SenseVoice (ASR) + Qwen2-Audio all run cleanly on PAI's `pai-inference` runtimes; spot A10G is ~¥1/hour. |
+| Validator host | **Alibaba Cloud ECS** (4 vCPU, 16 GB) | $72/mo equivalent; gives a stable Singapore / Hangzhou region for low-latency Subtensor RPC. |
+| Validated corpora storage | **Alibaba Cloud OSS** | Buyers (Mozilla / 国家语委 / iFlytek) pull from a public OSS bucket; on-chain weights only hold the hash. |
+| Bulk-corpus processing | **MaxCompute** + **DataWorks** | Ingest Common Voice nan-tw, normalise audio, run rolling FLORES eval at corpus-scale. |
+| LLM judge — Chinese | **Zhipu GLM-4.6** (primary) · **Alibaba Qwen-max** (secondary) | Both ideathon-credit-funded; both auto-selected by `make_glm()` before falling back to Claude. |
+| Speech-LLM miner | **Zhipu GLM-4-Voice** (`glm_voice_miner.py`) | End-to-end audio LLM; Zhipu's flagship audio product. |
+| TTS miner | **Alibaba CosyVoice** (`cosyvoice_miner.py`) | Multilingual / multi-emotion Chinese TTS; Alibaba Tongyi SpeechTeam. |
+| ASR miner | **Alibaba SenseVoice** (`sensevoice_miner.py`) | One model covers Mandarin + Cantonese + Min Nan + Hakka + Wu — i.e. the v1 wedge of this subnet. |
+
+Concrete sponsor-funded run cost (single validator + 1 GPU miner, 1 month):
+
+- ECS validator host: ¥500/mo (~$70)
+- PAI A10G spot miner: ¥720/mo (~$100)
+- OSS storage (1 TB validated corpora): ¥120/mo (~$17)
+- DataWorks / MaxCompute (10 corpus pipelines/day): ¥300/mo (~$42)
+- GLM-4.6 + Qwen API calls: covered by ideathon credits at launch
+- **Total cash post-credits: ~$229/mo** — well inside a hackathon budget.
+
+## 10. Local dev stack
 
 ```bash
 docker compose up        # static site on :8080

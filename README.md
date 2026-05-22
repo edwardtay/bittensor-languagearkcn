@@ -7,7 +7,7 @@ Built for **Proof of Intelligence: AI Subnet 创意黑客松** · Shanghai · 20
 Sponsors: Zhipu (GLM-4.6) · Alibaba Cloud.
 
 🌐 **Live:** https://language-ark-cn.lever-labs.com
-📊 **Tests:** 63 pytest + 8 forge = **71/71 passing** · **~1.8s** end-to-end demo · zero API keys required
+📊 **Tests:** 68 pytest + 8 forge = **76/76 passing** · **~1.8s** end-to-end demo · zero API keys required
 
 ### Judge's quickstart (≤ 5 minutes)
 
@@ -19,7 +19,7 @@ Sponsors: Zhipu (GLM-4.6) · Alibaba Cloud.
 | 🛠 How it would actually operate | [`OPS.md`](OPS.md) — runbooks, cost model, incidents |
 | 🤝 Diaspora partner orgs | [`partners.md`](partners.md) |
 | 📧 LOI templates + status tracker | [`OUTREACH.md`](OUTREACH.md) |
-| 🧪 Run the demo locally | `bash demo.sh` (2.3 s, no keys) |
+| 🧪 Run the demo locally | `bash demo.sh` (~1.8 s, no keys) |
 | ⚔️ The attack-defense proof | `python -m languageark.attack` (100 % vs 42 % knockout) |
 | ⛓ Solidity Speaker DAO | `cd contracts && forge test` (8 passing) |
 
@@ -28,7 +28,7 @@ git clone https://github.com/edwardtay/bittensor-languagearkcn
 cd bittensor-languagearkcn && python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 bash demo.sh        # 7-step Hokkien scoring + Yuma attack sim
-pytest -q           # 57 passed
+pytest -q           # 68 passed
 ```
 
 ---
@@ -96,7 +96,7 @@ languageark/
   subnet_register.py btcli mainnet command sheet
 contracts/           Foundry: SpeakerDAO.sol (stake + attest + slash + rating)
 scripts/             build_site.py, deploy_speaker_dao_local.py, validator_e2e_onchain.py
-tests/               63 pytest + 8 forge = 71 passing
+tests/               68 pytest + 8 forge = 76 passing
 slides/pitch.md      13-slide marp deck
 whitepaper.md · partners.md · OPS.md · HONESTY.md
 demo.sh              7-step demo, ~1.8s wall-clock, no API key required

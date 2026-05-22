@@ -200,12 +200,42 @@ TEMPLATE = """<!doctype html>
   footer {{ color:var(--muted); font-size:12.5px; text-align:center; padding:36px 24px; }}
   footer a {{ color:var(--fg-2); text-decoration:none; border-bottom:1px dotted var(--border-strong); }}
 
-  /* mobile */
+  /* ── mobile / responsive ─────────────────────── */
+  /* tables: horizontal scroll inside .table-wrap so they never blow the layout */
+  .table-wrap {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+
+  @media (max-width:900px) {{
+    .topbar-inner {{ flex-wrap:wrap; gap:8px; padding:10px 14px; }}
+    .topbar-actions {{ width:100%; flex-wrap:wrap; }}
+    .topbar-actions .chip {{ font-size:12px; padding:4px 8px; }}
+  }}
+
   @media (max-width:640px) {{
     .hero {{ padding:22px; }}
-    .hero h1 {{ font-size:24px; }}
-    .shell {{ padding:20px 14px 60px; }}
-    th, td {{ padding:10px 10px; }}
+    .hero h1 {{ font-size:23px; line-height:1.2; }}
+    .hero .sub {{ font-size:14px; }}
+    .shell {{ padding:18px 14px 60px; }}
+    th, td {{ padding:10px 10px; font-size:13px; }}
+    h1 {{ font-size:24px; line-height:1.2; }}
+    h2 {{ font-size:12px; }}
+    /* glossary dl: stack term over definition on narrow screens */
+    dl[style*="grid-template-columns"] {{ display:block !important; }}
+    dl[style*="grid-template-columns"] dt {{ margin-top:14px; }}
+    dl[style*="grid-template-columns"] dd {{ margin-left:0 !important; }}
+    /* tighten card padding */
+    .card-body {{ padding:16px !important; }}
+    .stat {{ padding:16px; }}
+    .stat .val {{ font-size:26px; }}
+    .badges {{ gap:6px; }}
+    .badges .chip {{ font-size:11.5px; padding:4px 8px; }}
+    /* the sidebar TOC collapses inline under <900 already; on phones make
+       it a horizontally-scrolling chip row instead of a vertical list */
+    .toc {{ padding:8px 0; }}
+    .toc h4 {{ display:none; }}
+    .toc {{ display:flex; flex-direction:row; overflow-x:auto; gap:4px; }}
+    .toc a {{ flex:0 0 auto; white-space:nowrap; border-left:none; border-bottom:2px solid transparent; padding:6px 10px; font-size:12.5px; }}
+    .toc a.active {{ border-left:none; border-bottom-color:var(--brand); }}
+    .toc a .num {{ width:auto; margin-right:4px; }}
   }}
 </style>
 </head>
@@ -488,7 +518,7 @@ TEMPLATE = """<!doctype html>
   <div class="card"><div class="card-body" style="padding:18px 22px;font-size:14px;color:var(--fg-2)">
     <p style="margin-top:0">Pass on {ts}. Corrections vs the previous /notes build:</p>
     <ul style="margin:8px 0 0;padding-left:22px">
-      <li>Test counts: <strong>63 pytest + 8 forge = 71</strong> (the 6-judge wiring added 5 new factory + override + OpenAI-compat round-trip tests).</li>
+      <li>Test counts: <strong>68 pytest + 8 forge = 76</strong> (the 6-judge wiring added 5 new factory + override + OpenAI-compat round-trip tests).</li>
       <li>FLORES-200: clarified — it ships <code>nan_Latn</code> (Latin/POJ Hokkien) but <em>not</em> Han-character Hokkien. Earlier wording "FLORES-200 has NO Hokkien" was overstated.</li>
       <li>Mozilla Common Voice "$/clip" estimates: <strong>removed</strong> — fabricated. Contributors are unpaid volunteers; only adjacent grant programs ever pay, and at variable amounts.</li>
       <li>RMB province-budget figures: hedged to "multi-million-RMB / multi-year line items" — directional, not precise.</li>
@@ -508,7 +538,7 @@ TEMPLATE = """<!doctype html>
       <li><strong>15s — 组织力</strong>: open <a href="/#/mechanism">Mechanism</a>, point at the DAO card. "母语者 stake 100 TAO + 2-of-3 attestation, Solidity 合约, 已部署."</li>
       <li><strong>15s — 验证力</strong>: open <a href="/#/scorer">Score a translation</a>. Click the three quality tiers — show chrF++ drop from 1.00 → 0.45 → 0.10.</li>
       <li><strong>25s — 博弈力</strong>: open <a href="/#/attack">Attack simulator</a>. Drag commit-reveal slider 0 → 5. "Freeloader 红条从 1.00 掉到 0.42 — 同一行代码差 58 分."</li>
-      <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 1.8 秒跑完, 71/71 测试通过 (含 8 个 Solidity), GLM / Qwen / Kimi / DeepSeek 4 大国产模型全部接入, 已部署. 谢谢."</li>
+      <li><strong>10s — 收尾</strong>: "<code>bash demo.sh</code> 1.8 秒跑完, 76/76 测试通过 (含 8 个 Solidity), GLM / Qwen / Kimi / DeepSeek 4 大国产模型全部接入, 已部署. 谢谢."</li>
     </ol>
   </div></div>
 
@@ -779,7 +809,8 @@ PRODUCT = r"""<!doctype html>
           <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
           <div class="card"><div class="ico">🧪</div><h3>6 LLM judges wired</h3><p>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</p></div>
           <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
-          <div class="card"><div class="ico">🌐</div><h3>SOTA many-to-many MT wired</h3><p>Miner wrappers for <strong>NLLB-200</strong> (Meta's 200-language text MT, the de-facto open standard) and <strong>SeamlessM4T-v2</strong> (text + speech, ~100 langs incl. Hokkien). UN uses human translators — these are the AI-side comparable.</p></div>
+          <div class="card"><div class="ico">🌐</div><h3>SOTA many-to-many MT wired</h3><p>Miner wrappers for <strong>NLLB-200</strong> and <strong>SeamlessM4T-v2</strong> (Meta's 200-lang text MT + speech). Plus <strong>FLORES+</strong> (2024, OpenLanguageData) as the active eval benchmark.</p></div>
+          <div class="card"><div class="ico">🏯</div><h3>Sponsor stack, end-to-end</h3><p><strong>Alibaba</strong>: CosyVoice (TTS) · SenseVoice (ASR — covers nan/yue/hak/wu in one model) · Qwen2-Audio (multimodal) · Qwen-max (judge). <strong>Zhipu</strong>: GLM-4.6 (judge) · GLM-4-Voice (speech LLM). One sponsor product per layer.</p></div>
         </div>
       </section>
 

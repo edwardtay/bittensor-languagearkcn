@@ -48,7 +48,7 @@ score(miner) = 0.4 · Elo_norm               (native-speaker DAO)
              + 0.3 · FLORES-200             (held-out, rotated weekly)
 ```
 
-Each signal is **independent** and **auditable in code** (this repo, <500 LoC).
+Each signal is **independent** and **auditable in code** (this repo).
 
 ---
 
@@ -164,7 +164,7 @@ $ bash demo.sh
 ❼  Buyer list
 ```
 
-Runs in **2.3 seconds**. No API key required (Claude / GLM judges optional).
+Runs in **~1.8 seconds**. No API key required (6 LLM judges + 4 sponsor-aligned miner backends auto-detected).
 
 ---
 
@@ -177,7 +177,7 @@ Runs in **2.3 seconds**. No API key required (Claude / GLM judges optional).
 | **验证力** | 3 independent signals; real `bt.Synapse` types; real FLORES-200 (997 pairs); chrF++ via `sacrebleu` |
 | **博弈力** | 6 attacks → 6 named defenses → **Yuma simulator proves 100% → 42% knockout** |
 
-Plus: **71/71 tests pass (63 pytest + 8 Foundry) · live deploy · whitepaper-grade docs**.
+Plus: **76/76 tests pass (68 pytest + 8 Foundry) · live deploy · whitepaper-grade docs**.
 
 ---
 

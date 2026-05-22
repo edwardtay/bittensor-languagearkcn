@@ -216,7 +216,8 @@
           <div class="card"><div class="ico">✅</div><h3>Mechanism shipped as real code</h3><p>Real <code>bt.Synapse</code> types (v10.3.2), real Glicko-2, real FLORES-200, real Yuma-style attack sim, real Solidity Speaker DAO.</p></div>
           <div class="card"><div class="ico">🧪</div><h3>6 LLM judges wired</h3><p>Auto-selects Chinese-native first: <strong>GLM-4.6 · Qwen · Kimi · DeepSeek</strong>, then Claude Code (Max-sub CLI, no API key), then Anthropic API, then heuristic mock. Override with <code>LANGUAGEARK_JUDGE=…</code>.</p></div>
           <div class="card"><div class="ico">🧱</div><h3>On-chain DAO</h3><p>Solidity contract deployed & exercised on anvil. Validator reads miner Glicko ratings from <code>getRating()</code>, not JSON.</p></div>
-          <div class="card"><div class="ico">🌐</div><h3>SOTA many-to-many MT wired</h3><p>Miner wrappers for <strong>NLLB-200</strong> (Meta's 200-language text MT, the de-facto open standard) and <strong>SeamlessM4T-v2</strong> (text + speech, ~100 langs incl. Hokkien). UN uses human translators — these are the AI-side comparable.</p></div>
+          <div class="card"><div class="ico">🌐</div><h3>SOTA many-to-many MT wired</h3><p>Miner wrappers for <strong>NLLB-200</strong> and <strong>SeamlessM4T-v2</strong> (Meta's 200-lang text MT + speech). Plus <strong>FLORES+</strong> (2024, OpenLanguageData) as the active eval benchmark.</p></div>
+          <div class="card"><div class="ico">🏯</div><h3>Sponsor stack, end-to-end</h3><p><strong>Alibaba</strong>: CosyVoice (TTS) · SenseVoice (ASR — covers nan/yue/hak/wu in one model) · Qwen2-Audio (multimodal) · Qwen-max (judge). <strong>Zhipu</strong>: GLM-4.6 (judge) · GLM-4-Voice (speech LLM). One sponsor product per layer.</p></div>
         </div>
       </section>
 
@@ -425,7 +426,7 @@
 
   // build time
   const bt = document.getElementById("build-ts");
-  if(bt) bt.textContent = "2026-05-22 07:11 UTC";
+  if(bt) bt.textContent = "2026-05-22 07:21 UTC";
 
   // ── attack simulator ────────────────────────────────────────
   function simAttack(crPeriod, drift){

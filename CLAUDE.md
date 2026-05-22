@@ -190,7 +190,7 @@ Use `glm-4.6` model via `https://open.bigmodel.cn/api/paas/v4/chat/completions`.
 
 ## Current status (updated 2026-05-21, v3)
 
-Submission-ready. Docs: README, whitepaper, partners, OPS, OUTREACH, HONESTY. Code: 63 pytest + 8 forge = **71/71 passing**. Live finney-readable chain probe, real FLORES-200 (997 yue↔zho pairs), real chrF++/WER, Glicko-2, Yuma attack sim, on-chain SpeakerDAO (Foundry), **6 LLM judges wired** (GLM-4.6 · Qwen · Kimi · DeepSeek · Claude Code via Max sub · Anthropic API). Live at https://language-ark-cn.lever-labs.com (CapRover); repo at github.com/edwardtay/bittensor-languagearkcn.
+Submission-ready. Docs: README, whitepaper, partners, OPS, OUTREACH, HONESTY. Code: 68 pytest + 8 forge = **76/76 passing**. Live finney-readable chain probe, real FLORES-200 (997 yue↔zho pairs), real chrF++/WER, Glicko-2, Yuma attack sim, on-chain SpeakerDAO (Foundry), **6 LLM judges + 4 sponsor-aligned miner backends wired** (GLM-4.6 · Qwen · Kimi · DeepSeek · Claude Code via Max sub · Anthropic API). Live at https://language-ark-cn.lever-labs.com (CapRover); repo at github.com/edwardtay/bittensor-languagearkcn.
 
 Stretch / event-day only:
 
